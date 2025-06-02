@@ -1,0 +1,160 @@
+name: 🔍 Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  norminette:
+    name: 📏 Norminette Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+        
+    - name: 📏 Install Norminette
+      run: |
+        pip install norminette
+        
+    - name: 🔍 Check source files
+      run: |
+        echo "🔍 Checking src/ directory..."
+        norminette src/ || echo "⚠️ Norminette issues found in src/"
+        
+    - name: 🔍 Check include files
+      run: |
+        echo "🔍 Checking include/ directory..."
+        norminette include/ || echo "⚠️ Norminette issues found in include/"
+        
+    - name: 🔍 Check libft
+      run: |
+        echo "🔍 Checking libft/ directory..."
+        norminette libft/src/ libft/include/ || echo "⚠️ Norminette issues found in libft/"
+
+  static-analysis:
+    name: 🔬 Static Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Install analysis tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cppcheck clang-tidy
+        
+    - name: 🔬 Run cppcheck
+      run: |
+        echo "🔬 Running cppcheck static analysis..."
+        cppcheck --enable=all --inconclusive --std=c99 \
+          --suppress=missingIncludeSystem \
+          --suppress=unusedFunction \
+          src/ include/ 2>&1 | tee cppcheck_report.txt
+          
+    - name: 📋 Upload cppcheck report
+      uses: actions/upload-artifact@v4
+      with:
+        name: cppcheck-report
+        path: cppcheck_report.txt
+
+  compilation-warnings:
+    name: ⚠️ Compilation Warnings
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Build with strict warnings
+      run: |
+        echo "🔧 Building with strict warning flags..."
+        cd libft
+        make CFLAGS="-Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -std=c99"
+        cd ..
+        make CFLAGS="-Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -std=c99"
+        
+    - name: 🧪 Build tests with warnings
+      run: |
+        cd tests
+        make CFLAGS="-Wall -Wextra -Werror -Wpedantic -Wconversion -Wshadow -std=c99"
+
+  documentation:
+    name: 📚 Documentation Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: 📚 Check README files
+      run: |
+        echo "📚 Checking documentation completeness..."
+        
+        # Check main README
+        if [ ! -f README.md ]; then
+          echo "❌ Main README.md is missing!"
+          exit 1
+        else
+          echo "✅ Main README.md exists"
+        fi
+        
+        # Check test documentation
+        if [ ! -f tests/README.md ]; then
+          echo "❌ Test README.md is missing!"
+          exit 1
+        else
+          echo "✅ Test README.md exists"
+        fi
+        
+        # Check for basic content
+        if grep -q "lem-in" README.md; then
+          echo "✅ README mentions lem-in"
+        else
+          echo "⚠️ README should mention lem-in"
+        fi
+        
+    - name: 📊 Check function documentation
+      run: |
+        echo "📊 Checking function documentation..."
+        
+        # Look for functions without comments
+        echo "Functions that might need documentation:"
+        grep -r "^[a-zA-Z_][a-zA-Z0-9_]*\s*(" src/ include/ --include="*.c" --include="*.h" | \
+        grep -v "//" | head -10 || echo "✅ All functions seem documented"
+
+  security:
+    name: 🔒 Security Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: 🔒 Check for security issues
+      run: |
+        echo "🔒 Checking for potential security issues..."
+        
+        # Check for dangerous functions
+        echo "Checking for dangerous function usage..."
+        if grep -r "strcpy\|strcat\|sprintf\|gets" src/ include/ --include="*.c" --include="*.h"; then
+          echo "⚠️ Found potentially unsafe functions!"
+        else
+          echo "✅ No obviously dangerous functions found"
+        fi
+        
+        # Check for hardcoded values that might be problematic
+        echo "Checking for potential hardcoded issues..."
+        if grep -r "TODO\|FIXME\|XXX\|HACK" src/ include/ --include="*.c" --include="*.h"; then
+          echo "⚠️ Found TODO/FIXME comments that should be addressed"
+        else
+          echo "✅ No TODO/FIXME comments found"
+        fi
