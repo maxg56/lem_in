@@ -12,7 +12,7 @@
 
 # Variables
 
-NAME			= cub3D
+NAME			= lem-in
 
 INCLUDE			= include
 
@@ -24,7 +24,7 @@ CFLAGS			= -Wall -Wextra -Werror -g -O3
 RM				= rm -f
 MKDIR			= mkdir
 
-LIBFT_DIR		= lib/libft/
+LIBFT_DIR		= libft/
 LIBFT_CFLAGS	= -L . -l ft
 LIBFT			= libft.a
 LIBFT_INC_H		= include/libft.h
