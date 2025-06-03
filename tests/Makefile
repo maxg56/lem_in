@@ -44,7 +44,11 @@ SRC_FILES = $(SRC_DIR)/utils/grsph/createGraph.c \
             $(SRC_DIR)/utils/grsph/displayGraph.c \
             $(SRC_DIR)/utils/grsph/addEdge.c \
             $(SRC_DIR)/utils/grsph/searchGraph.c \
-            $(SRC_DIR)/utils/grsph/validateGraph.c
+            $(SRC_DIR)/utils/grsph/validateGraph.c \
+            $(SRC_DIR)/utils/grsph/resizeGraph.c \
+            $(SRC_DIR)/parsigne/parsigene.c \
+
+
 
 # Object files
 TEST_OBJS = $(TEST_SRCS:.c=.o)
