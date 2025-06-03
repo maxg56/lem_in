@@ -1,8 +1,8 @@
 #include "data.h"
 
 void addEdge(Graph* graph, int nodeA, int nodeB) {
-    if (!graph || nodeA < 0 || nodeB < 0 || nodeA >= graph->size || nodeB >= graph->size) {
-        return;
+    if (!graph || nodeA < 0 || nodeB < 0 || nodeA >= graph->node_count || nodeB >= graph->node_count) {
+        return; // Utilise node_count (nombre de nœuds utilisés) pour la validation
     }
     
     if (!graph->adjacencyList[nodeA] || !graph->adjacencyList[nodeB]) {
@@ -46,8 +46,8 @@ void addEdgeByName(Graph* graph, char* nameA, char* nameB) {
 }
 
 bool hasEdge(Graph* graph, int nodeA, int nodeB) {
-    if (!graph || nodeA < 0 || nodeB < 0 || nodeA >= graph->size || nodeB >= graph->size) {
-        return false;
+    if (!graph || nodeA < 0 || nodeB < 0 || nodeA >= graph->node_count || nodeB >= graph->node_count) {
+        return false; // Utilise node_count (nombre de nœuds utilisés) pour la validation
     }
     
     if (!graph->adjacencyList[nodeA]) {
@@ -66,8 +66,8 @@ bool hasEdge(Graph* graph, int nodeA, int nodeB) {
 }
 
 void removeEdge(Graph* graph, int nodeA, int nodeB) {
-    if (!graph || nodeA < 0 || nodeB < 0 || nodeA >= graph->size || nodeB >= graph->size) {
-        return;
+    if (!graph || nodeA < 0 || nodeB < 0 || nodeA >= graph->node_count || nodeB >= graph->node_count) {
+        return; // Utilise node_count (nombre de nœuds utilisés) pour la validation
     }
     
     // Supprimer la connexion de A vers B
