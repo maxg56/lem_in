@@ -16,7 +16,6 @@ int main(int argc, char *argv[]) {
     }
 
     if (!graph) {
-        printf("Error: Failed to parse input\n");
         
         // Afficher l'erreur spécifique si elle existe
         if (has_parsing_error()) {
@@ -26,16 +25,16 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    printf("✅ Parsing completed successfully\n");
+    // printf("✅ Parsing completed successfully\n");
     
-    // Here you would typically process the graph, e.g., find paths, etc.
-    // For demonstration, we will just print the size of the graph
-    printf("Number of nodes: %d\n", graph->node_count);
-    printf("Graph capacity: %d\n", graph->size);
-    printf("Number of ants: %d\n", graph->nb_fourmis);
+    // // Here you would typically process the graph, e.g., find paths, etc.
+    // // For demonstration, we will just print the size of the graph
+    // printf("Number of nodes: %d\n", graph->node_count);
+    // printf("Graph capacity: %d\n", graph->size);
+    // printf("Number of ants: %d\n", graph->nb_fourmis);
     
-    // Afficher le graphe parsé
-    displayGraph(graph);
+    // // Afficher le graphe parsé
+    // displayGraph(graph);
     Path *path = find_path(graph);
 
 	// Affichage du chemin

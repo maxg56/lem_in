@@ -196,10 +196,10 @@ Graph* parsigense(int fd) {
     }
     
     // Vérifier qu'il y a un chemin entre start et end
-    if (!validateGraph(graph)) {
-        set_parsing_error(ERROR_NO_PATH, "Pas de chemin possible entre start et end");
-        return NULL;
-    }
+    // if (!validateGraph(graph)) {
+    //     set_parsing_error(ERROR_NO_PATH, "Pas de chemin possible entre start et end");
+    //     return NULL;
+    // }
 
     // Ajuster la taille finale du graphe au nombre réel de nœuds
     if (graph->node_count > 0 && graph->node_count < graph->size_max) {

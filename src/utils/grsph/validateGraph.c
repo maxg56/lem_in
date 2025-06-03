@@ -84,10 +84,7 @@ bool isGraphConnected(Graph* graph) {
     
     // Queue simple pour BFS
     int* queue = (int*)ft_arnalloc(sizeof(int) * graph->node_count);
-    if (!queue) {
-        free(visited);
-        return false;
-    }
+    if (!queue) return false;
     
     int front = 0, rear = 0;
     queue[rear++] = startIndex;
@@ -100,8 +97,8 @@ bool isGraphConnected(Graph* graph) {
         // Parcourir tous les voisins
         Node* neighbor = graph->adjacencyList[current]->next;
         while (neighbor) {
-            int neighborIndex = findNodeByName(graph, neighbor->Nan);
-            if (neighborIndex != -1 && neighborIndex < graph->node_count && !visited[neighborIndex]) {
+            int neighborIndex = neighbor->x;
+            if (neighborIndex >= 0 && neighborIndex < graph->node_count && !visited[neighborIndex]) {
                 visited[neighborIndex] = true;
                 queue[rear++] = neighborIndex;
                 visitedCount++;
@@ -110,13 +107,11 @@ bool isGraphConnected(Graph* graph) {
         }
     }
     
-    // Note: ft_arn_calloc and ft_arnalloc use arena allocation
-    // Memory will be freed by ft_arna_free() at program end
     return visitedCount == nodeCount;
 }
 
 bool isConnected(Graph* graph, int nodeA, int nodeB) {
-    if (!graph || nodeA < 0 || nodeB < 0 || nodeA >= graph->size || nodeB >= graph->size) {
+    if (!graph || nodeA < 0 || nodeB < 0 || nodeA >= graph->node_count || nodeB >= graph->node_count) {
         return false;
     }
     
@@ -127,32 +122,28 @@ bool isConnected(Graph* graph, int nodeA, int nodeB) {
     }
     
     // Utiliser BFS pour trouver un chemin de A vers B
-    bool* visited = (bool*)ft_arn_calloc(graph->size, sizeof(bool));
+    bool* visited = (bool*)ft_arn_calloc(graph->node_count, sizeof(bool));
     if (!visited) return false;
     
-    int* queue = (int*)ft_arnalloc(sizeof(int) * graph->size);
-    if (!queue) {
-        return false;
-    }
+    int* queue = (int*)ft_arnalloc(sizeof(int) * graph->node_count);
+    if (!queue) return false;
     
     int front = 0, rear = 0;
     queue[rear++] = nodeA;
     visited[nodeA] = true;
-    bool result = false;
     
     while (front < rear) {
         int current = queue[front++];
         
         if (current == nodeB) {
-            result = true;
-            break;
+            return true;
         }
         
         // Parcourir tous les voisins
         Node* neighbor = graph->adjacencyList[current]->next;
         while (neighbor) {
-            int neighborIndex = findNodeByName(graph, neighbor->Nan);
-            if (neighborIndex != -1 && neighborIndex < graph->size && !visited[neighborIndex]) {
+            int neighborIndex = neighbor->x;
+            if (neighborIndex >= 0 && neighborIndex < graph->node_count && !visited[neighborIndex]) {
                 visited[neighborIndex] = true;
                 queue[rear++] = neighborIndex;
             }
@@ -160,5 +151,5 @@ bool isConnected(Graph* graph, int nodeA, int nodeB) {
         }
     }
     
-    return result;
+    return false;
 }
