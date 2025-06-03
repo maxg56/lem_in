@@ -16,7 +16,9 @@ typedef struct Node {
 } Node;
 
 typedef struct Graph {
-    int size;
+    int size;           // Capacity (for compatibility with tests)
+    int node_count;     // Number of actually used nodes
+    int size_max;       // Maximum capacity for dynamic resizing
     int nb_fourmis;
     Node** adjacencyList;
 } Graph;
@@ -49,5 +51,8 @@ bool validateGraph(Graph* graph);
 bool hasStartEnd(Graph* graph);
 bool isGraphConnected(Graph* graph);
 bool isConnected(Graph* graph, int nodeA, int nodeB);
+
+// Resize functions
+bool resizeGraph(Graph* graph, int newSize);
 
 #endif
