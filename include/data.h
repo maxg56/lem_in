@@ -10,8 +10,10 @@ typedef struct Node {
     char *Nan;
     bool isStart;
     bool isEnd;
+    bool visited; 
     int x;
     int y;
+    int parentNode;
     struct Node* next;
 } Node;
 
@@ -24,7 +26,7 @@ typedef struct Graph {
 Graph* createGraph(int size);
 void displayGraph(Graph* graph);
 void addNode(Graph* graph, char * Nan, int x , int y, bool isStart, bool isEnd);
-void resetNodePosition(void);
+void resetNodePosition(Graph *graph);
 
 // Gestion des connexions/arêtes
 void addEdge(Graph* graph, int nodeA, int nodeB);
