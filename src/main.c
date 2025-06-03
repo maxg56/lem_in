@@ -2,18 +2,6 @@
 
 int	main(void)
 {
-	Graph *graph = createGraph(5);
-
-	addNode(graph, "A", 0, 0, true, false);  // start
-	addNode(graph, "B", 1, 0, false, false);
-	addNode(graph, "C", 2, 0, false, false);
-	addNode(graph, "D", 3, 0, false, false);
-	addNode(graph, "E", 4, 0, false, true);  // end
-
-	// Connexions
-	addEdgeByName(graph, "A", "B");
-	addEdgeByName(graph, "B", "C");
-	addEdgeByName(graph, "C", "E");
 
 	// Exécution de l'algo BFS
 	Path *path = find_path(graph);
