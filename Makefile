@@ -19,7 +19,7 @@ INCLUDE			= include
 TMP				= .tmp/
 CC				= cc 
 CFLAGS_Dbeug	= -fsanitize=address,undefined -g
-CFLAGS			= -Wall -Wextra -Werror -g -O3
+CFLAGS			= -Wall -Wextra -Werror -g -O3 -fPIE
 
 RM				= rm -f
 MKDIR			= mkdir
