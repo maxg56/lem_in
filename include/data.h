@@ -67,7 +67,7 @@ typedef struct Path{
 Graph* createGraph(int size);
 void displayGraph(Graph* graph);
 void addNode(Graph* graph, char * Nan, int x , int y, bool isStart, bool isEnd);
-void resetNodePosition(Graph *graph);
+void resetNodePosition(void);
 
 // Gestion des connexions/arêtes
 void addEdge(Graph* graph, int nodeA, int nodeB);
@@ -90,6 +90,7 @@ bool areNeighbors(Graph* graph, int nodeA, int nodeB);
 // Validation
 bool validateGraph(Graph* graph);
 bool hasStartEnd(Graph* graph);
+bool isConnected(Graph* graph, int nodeA, int nodeB);
 
 // Gestion d'erreurs
 void set_parsing_error(ParsingError error, const char *custom_message);

@@ -1,6 +1,6 @@
 #include "lem-in.h"
 
-void resetNodePosition(Graph *graph) {
+void resetNodePositions(Graph *graph) {
 	for (int i = 0; i < graph->size; i++) {
 		Node *node = getNodeByIndex(graph, i);
 		if (node) {
@@ -12,7 +12,7 @@ void resetNodePosition(Graph *graph) {
 
 Path *find_path(Graph* graph)
 {
-	resetNodePosition(graph);
+	resetNodePositions(graph);
 
 	Node* startNode = getStartNode(graph);
 	Node* endNode = getEndNode(graph);
