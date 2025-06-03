@@ -43,8 +43,10 @@ typedef struct Node {
     char *Nan;
     bool isStart;
     bool isEnd;
+    bool visited; 
     int x;
     int y;
+    int parentNode;
     struct Node* next;
 } Node;
 
@@ -56,10 +58,16 @@ typedef struct Graph {
     Node** adjacencyList;
 } Graph;
 
+typedef struct Path{
+    int *nodes;
+    int len;
+    int assigned_ants; 
+} Path;
+
 Graph* createGraph(int size);
 void displayGraph(Graph* graph);
 void addNode(Graph* graph, char * Nan, int x , int y, bool isStart, bool isEnd);
-void resetNodePosition(void);
+void resetNodePosition(Graph *graph);
 
 // Gestion des connexions/arêtes
 void addEdge(Graph* graph, int nodeA, int nodeB);
@@ -102,5 +110,9 @@ bool is_empty_line_valid(const char *line, bool end_of_file);
 
 // Resize functions
 bool resizeGraph(Graph* graph, int newSize);
+
+//Algorithmes
+Path* find_path(Graph* graph);
+Path *build_path(Graph *graph, int end_index);
 
 #endif
