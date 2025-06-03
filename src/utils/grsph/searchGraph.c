@@ -86,10 +86,16 @@ Node** getNeighbors(Graph* graph, int nodeIndex, int* count) {
     current = graph->adjacencyList[nodeIndex]->next;
     int i = 0;
     while (current && i < *count) {
-        neighbors[i] = graph->adjacencyList[current->x];
+        // Vérifier que l'index est valide avant d'accéder à l'adjacencyList
+        if (current->x >= 0 && current->x < graph->node_count && graph->adjacencyList[current->x]) {
+            neighbors[i] = graph->adjacencyList[current->x];
+            i++;
+        }
         current = current->next;
-        i++;
     }
+    
+    // Ajuster le count si certains voisins étaient invalides
+    *count = i;
     
     return neighbors;
 }

@@ -1,7 +1,8 @@
 #include "lem-in.h"
 
 void resetNodePositions(Graph *graph) {
-	for (int i = 0; i < graph->size; i++) {
+	if (!graph) return;
+	for (int i = 0; i < graph->node_count; i++) {
 		Node *node = getNodeByIndex(graph, i);
 		if (node) {
 			node->visited = false;
@@ -24,7 +25,7 @@ Path *find_path(Graph* graph)
 	if (start == -1 || end == -1)
 		return NULL;
 
-	int queue[graph->size];
+	int queue[graph->node_count];
 	int front = 0, rear = 0;
 	queue[rear++] = start;
 	startNode->visited = true;
@@ -45,7 +46,9 @@ Path *find_path(Graph* graph)
 			{
 				neighbors[i]->visited = true;
 				neighbors[i]->parentNode = current_index;
-				queue[rear++] = ni;
+				if (rear < graph->node_count) { // Prevent queue overflow
+					queue[rear++] = ni;
+				}
 			}
 		}
 	}
