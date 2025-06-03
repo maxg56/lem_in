@@ -1,0 +1,7 @@
+3
+##start
+# This is a comment, not a room
+room1 0 0
+##end
+room2 1 1
+room1-room2
