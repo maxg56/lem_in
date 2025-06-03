@@ -1,17 +1,28 @@
 #include "lem-in.h"
+#include <stdio.h>
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        // fprintf(stderr, "Usage: %s <input_file>\n", argv[0]);
-        // return EXIT_FAILURE;
+    Graph* graph = NULL;
+    
+    // Clear any previous parsing errors
+    clear_parsing_error();
+    
+    if (argc == 2) {
+        const char *filename = argv[1];
+        graph = parse_from_file(filename);
+    }
+    else {
+        graph = parsigense(0); 
     }
 
-    const char *filename = argv[1];
-    (void)filename; // Suppress unused variable warning
-
-    Graph* graph = parsigense(0);
     if (!graph) {
         printf("Error: Failed to parse input\n");
+        
+        // Afficher l'erreur spécifique si elle existe
+        if (has_parsing_error()) {
+            print_parsing_error();
+        }
+        
         return EXIT_FAILURE;
     }
 

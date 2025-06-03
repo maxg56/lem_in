@@ -18,6 +18,7 @@ TEST_DIR = tests
 INCLUDE_DIR = ../include
 LIBFT_DIR = ../libft
 SRC_DIR = ../src
+TMP		= ../.tmp/
 
 # Compiler and flags
 CC = cc
@@ -39,20 +40,12 @@ TEST_SRCS = test_main.c \
             test_validation.c
 
 # Source files to test (your actual implementation)
-SRC_FILES = $(SRC_DIR)/utils/grsph/createGraph.c \
-            $(SRC_DIR)/utils/grsph/addNode.c \
-            $(SRC_DIR)/utils/grsph/displayGraph.c \
-            $(SRC_DIR)/utils/grsph/addEdge.c \
-            $(SRC_DIR)/utils/grsph/searchGraph.c \
-            $(SRC_DIR)/utils/grsph/validateGraph.c \
-            $(SRC_DIR)/utils/grsph/resizeGraph.c \
-            $(SRC_DIR)/parsigne/parsigene.c \
-
-
+SRC_FILES = $(shell find ../src -iname "*.c" ! -name "main.c")
 
 # Object files
-TEST_OBJS = $(TEST_SRCS:.c=.o)
-SRC_OBJS = $(SRC_FILES:.c=.o)
+OBJ_DIR = $(TMP)obj/
+TEST_OBJS = $(patsubst %.c, $(OBJ_DIR)%.o, $(TEST_SRCS))
+SRC_OBJS = $(patsubst %.c, $(OBJ_DIR)%.o, $(SRC_FILES))
 
 # Colors
 GREEN = \033[0;32m
@@ -67,8 +60,13 @@ $(TEST_NAME): $(TEST_OBJS) $(SRC_OBJS)
 	@$(CC) $(CFLAGS) $(TEST_OBJS) $(SRC_OBJS) $(LIBFT_FLAGS) -o $(TEST_NAME)
 	@printf "$(GREEN)Test suite compiled successfully!$(DEF_COLOR)\n"
 
-%.o: %.c
+$(OBJ_DIR)%.o: %.c | $(OBJF)
+	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(OBJF):
+	@mkdir -p $(OBJ_DIR)
+
 
 libft:
 	@make -C $(LIBFT_DIR)
@@ -108,12 +106,17 @@ test-integration: all
 
 # Cleanup
 clean:
-	@rm -f $(TEST_OBJS) $(SRC_OBJS)
-	@printf "$(YELLOW)Test object files cleaned.$(DEF_COLOR)\n"
+	@if [ -d $(OBJ_DIR) ]; then \
+		rm -rf $(OBJ_DIR); \
+		printf "$(YELLOW)Test object files cleaned.$(DEF_COLOR)\n"; \
+	fi
 
 fclean: clean
 	@rm -f $(TEST_NAME)
 	@rm -f test_*.txt
+	@if [ -d $(TMP) ]; then \
+		rm -rf $(TMP); \
+	fi
 	@printf "$(YELLOW)Test executable and test files cleaned.$(DEF_COLOR)\n"
 
 fclean-all: fclean
