@@ -1,15 +1,18 @@
 #include "data.h"
 
-static int current_pos = 0;
-
-// void resetNodePosition(void) {
-//     current_pos = 0;
-// }
+void resetNodePosition(void) {
+    // Cette fonction n'est plus nécessaire avec la nouvelle approche
+    // mais on la garde pour la compatibilité
+}
 
 void addNode(Graph* graph, char * Nan, int x , int y, bool isStart, bool isEnd) {
-    if (current_pos >= graph->size) {
-        return; // No more space in the graph
+    // Redimensionner si nécessaire
+    if (graph->node_count >= graph->size_max) {
+        if (!resizeGraph(graph, graph->size_max * 2)) {
+            return; // Failed to resize
+        }
     }
+    
     Node* newNode = (Node*)ft_arnalloc(sizeof(Node));
     if (!newNode) {
         return; // Memory allocation failed
@@ -20,6 +23,6 @@ void addNode(Graph* graph, char * Nan, int x , int y, bool isStart, bool isEnd) 
     newNode->isStart = isStart;
     newNode->isEnd = isEnd;
     newNode->next = NULL;
-    graph->adjacencyList[current_pos] = newNode;
-    current_pos++;
+    graph->adjacencyList[graph->node_count] = newNode;
+    graph->node_count++; // Incrémenter le nombre de nœuds utilisés
 }

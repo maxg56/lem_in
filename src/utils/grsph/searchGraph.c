@@ -3,7 +3,7 @@
 int findNodeByName(Graph* graph, char* name) {
     if (!graph || !name) return -1;
     
-    for (int i = 0; i < graph->size; i++) {
+    for (int i = 0; i < graph->node_count; i++) {
         if (graph->adjacencyList[i] && graph->adjacencyList[i]->Nan) {
             if (ft_strcmp(graph->adjacencyList[i]->Nan, name) == 0) {
                 return i;
@@ -15,7 +15,7 @@ int findNodeByName(Graph* graph, char* name) {
 }
 
 Node* getNodeByIndex(Graph* graph, int index) {
-    if (!graph || index < 0 || index >= graph->size) {
+    if (!graph || index < 0 || index >= graph->node_count) {
         return NULL;
     }
     
@@ -25,7 +25,7 @@ Node* getNodeByIndex(Graph* graph, int index) {
 Node* getStartNode(Graph* graph) {
     if (!graph) return NULL;
     
-    for (int i = 0; i < graph->size; i++) {
+    for (int i = 0; i < graph->node_count; i++) {
         if (graph->adjacencyList[i] && graph->adjacencyList[i]->isStart) {
             return graph->adjacencyList[i];
         }
@@ -37,7 +37,7 @@ Node* getStartNode(Graph* graph) {
 Node* getEndNode(Graph* graph) {
     if (!graph) return NULL;
     
-    for (int i = 0; i < graph->size; i++) {
+    for (int i = 0; i < graph->node_count; i++) {
         if (graph->adjacencyList[i] && graph->adjacencyList[i]->isEnd) {
             return graph->adjacencyList[i];
         }
@@ -49,18 +49,11 @@ Node* getEndNode(Graph* graph) {
 int getNodeCount(Graph* graph) {
     if (!graph) return 0;
     
-    int count = 0;
-    for (int i = 0; i < graph->size; i++) {
-        if (graph->adjacencyList[i]) {
-            count++;
-        }
-    }
-    
-    return count;
+    return graph->node_count;
 }
 
 Node** getNeighbors(Graph* graph, int nodeIndex, int* count) {
-    if (!graph || nodeIndex < 0 || nodeIndex >= graph->size || !count) {
+    if (!graph || nodeIndex < 0 || nodeIndex >= graph->node_count || !count) {
         if (count) *count = 0;
         return NULL;
     }
@@ -102,7 +95,7 @@ Node** getNeighbors(Graph* graph, int nodeIndex, int* count) {
 }
 
 int getNeighborCount(Graph* graph, int nodeIndex) {
-    if (!graph || nodeIndex < 0 || nodeIndex >= graph->size) {
+    if (!graph || nodeIndex < 0 || nodeIndex >= graph->node_count) {
         return 0;
     }
     

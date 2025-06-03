@@ -1,0 +1,13 @@
+10
+# This is a comment
+##start
+start_room 0 0
+middle1 1 1
+middle2 2 2
+##end
+end_room 3 3
+# Links section
+start_room-middle1
+middle1-middle2
+middle2-end_room
+# This should be a working complex map

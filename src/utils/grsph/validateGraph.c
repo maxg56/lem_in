@@ -39,7 +39,7 @@ bool hasStartEnd(Graph* graph) {
     bool hasStart = false;
     bool hasEnd = false;
     
-    for (int i = 0; i < graph->size; i++) {
+    for (int i = 0; i < graph->node_count; i++) {
         if (graph->adjacencyList[i]) {
             if (graph->adjacencyList[i]->isStart) {
                 if (hasStart) {
@@ -69,7 +69,7 @@ bool isGraphConnected(Graph* graph) {
     
     // Utiliser BFS pour vérifier la connectivité depuis le premier nœud non-NULL
     int startIndex = -1;
-    for (int i = 0; i < graph->size; i++) {
+    for (int i = 0; i < graph->node_count; i++) {
         if (graph->adjacencyList[i]) {
             startIndex = i;
             break;
@@ -79,11 +79,11 @@ bool isGraphConnected(Graph* graph) {
     if (startIndex == -1) return false;
     
     // Tableau pour marquer les nœuds visités
-    bool* visited = (bool*)ft_arn_calloc(graph->size, sizeof(bool));
+    bool* visited = (bool*)ft_arn_calloc(graph->node_count, sizeof(bool));
     if (!visited) return false;
     
     // Queue simple pour BFS
-    int* queue = (int*)ft_arnalloc(sizeof(int) * graph->size);
+    int* queue = (int*)ft_arnalloc(sizeof(int) * graph->node_count);
     if (!queue) return false;
     
     int front = 0, rear = 0;
