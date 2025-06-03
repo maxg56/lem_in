@@ -23,6 +23,12 @@ typedef struct Graph {
     Node** adjacencyList;
 } Graph;
 
+typedef struct Path{
+    int *nodes;
+    int len;
+    int assigned_ants; 
+} Path;
+
 Graph* createGraph(int size);
 void displayGraph(Graph* graph);
 void addNode(Graph* graph, char * Nan, int x , int y, bool isStart, bool isEnd);
@@ -51,5 +57,9 @@ bool validateGraph(Graph* graph);
 bool hasStartEnd(Graph* graph);
 bool isGraphConnected(Graph* graph);
 bool isConnected(Graph* graph, int nodeA, int nodeB);
+
+//Algorithmes
+Path* find_path(Graph* graph);
+Path *build_path(Graph *graph, int end_index);
 
 #endif

@@ -2,9 +2,9 @@
 
 static int current_pos = 0;
 
-void resetNodePosition(void) {
-    current_pos = 0;
-}
+// void resetNodePosition(void) {
+//     current_pos = 0;
+// }
 
 void addNode(Graph* graph, char * Nan, int x , int y, bool isStart, bool isEnd) {
     if (current_pos >= graph->size) {
