@@ -121,6 +121,7 @@ char	*ft_arn_strjoin(char const *s1, char const *s2);
 char	*ft_arn_strjoin3(char *s1, char *s2, char *s3);
 char	*ft_arn_substr(char const *s, unsigned int start, size_t len);
 char	**ft_arn_split(char const *s, char c);
+char	*ft_arn_strtrim(char const *s1, char const *set);
 char	*ft_arn_strdup(char *src);
 
 //ft_to

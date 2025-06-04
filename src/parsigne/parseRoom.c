@@ -15,9 +15,9 @@ bool parseRoom(Graph* graph, char* line, bool isStart, bool isEnd) {
         return false;
     }
     
-    char *name = ft_strtrim(tokens[0], " \t\n\r");
-    char *x_str = ft_strtrim(tokens[1], " \t\n\r");
-    char *y_str = ft_strtrim(tokens[2], " \t\n\r");
+    char *name = ft_arn_strtrim(tokens[0], " \t\n\r");
+    char *x_str = ft_arn_strtrim(tokens[1], " \t\n\r");
+    char *y_str = ft_arn_strtrim(tokens[2], " \t\n\r");
     
     if (!name || !x_str || !y_str) {
         set_parsing_error(ERROR_ROOM_FORMAT, "Erreur lors du parsing des tokens");

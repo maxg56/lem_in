@@ -37,7 +37,7 @@ Graph* parsigense(int fd) {
         }
         
         // Trim whitespace
-        char *trimmed_line = ft_strtrim(line, " \t\n\r");
+        char *trimmed_line = ft_arn_strtrim(line, " \t\n\r");
         if (!trimmed_line || trimmed_line[0] == '\0') {
             continue;
         }
