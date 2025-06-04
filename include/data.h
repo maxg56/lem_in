@@ -116,4 +116,6 @@ bool resizeGraph(Graph* graph, int newSize);
 Path* find_path(Graph* graph);
 Path *build_path(Graph *graph, int end_index);
 
+//Mouvements des fourmis
+void antsMovements(Graph *graph, Path *path);
 #endif
