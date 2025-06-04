@@ -35,27 +35,36 @@ int main(int argc, char *argv[]) {
     
     // // Afficher le graphe parsé
     // displayGraph(graph);
-    Path *path = find_path(graph);
+    // Path *path = find_path(graph);
 
 	// Affichage du chemin
-        if (path)
+    int path_count = 0;
+    Path **paths = findAllPaths(graph, &path_count);
+
+    if (!paths || path_count == 0)
+    {
+        ft_putstr_fd("Aucun chemin trouvé.\n", 2);
+        ft_arna_free();
+        return EXIT_FAILURE;
+    }
+
+    assignAnts(paths, path_count, graph->nb_fourmis);
+
+    for (int i = 0; i < path_count; i++)
+    {
+        ft_printf("Chemin %d (%d salles, %d fourmis) : ", i + 1, paths[i]->len, paths[i]->assigned_ants);
+        for (int j = 0; j < paths[i]->len; j++)
         {
-            ft_putstr_fd("Chemin trouvé : ", 1);
-            for (int i = 0; i < path->len; i++)
-            {
-                Node *node = getNodeByIndex(graph, path->nodes[i]);
-                ft_putstr_fd(node->Nan, 1);
-                if (i < path->len - 1)
-                    ft_putstr_fd(" -> ", 1);
-            }
-            ft_putchar_fd('\n', 1);
-            antsMovements(graph, path);
+            Node *node = getNodeByIndex(graph, paths[i]->nodes[j]);
+            ft_putstr_fd(node->Nan, 1);
+            if (j < paths[i]->len - 1)
+                ft_putstr_fd(" -> ", 1);
         }
-        else
-            ft_putstr_fd("Aucun chemin trouvé.\n", 2);
-    
-    // Free allocated resources if necessary
-    // For example, if you had dynamically allocated memory in the graph structure
+        ft_putchar_fd('\n', 1);
+    }
+
+    multiplePaths(graph, paths, path_count);
+
     ft_arna_free();
     return EXIT_SUCCESS;
 }

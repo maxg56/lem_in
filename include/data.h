@@ -64,6 +64,13 @@ typedef struct Path{
     int assigned_ants; 
 } Path;
 
+typedef struct Ants{
+    int id;
+    int position; // Index of the current node in the path
+    int path_index; // Index of the path in the graph
+    bool arrived; // Indicates if the ant has reached the end
+} Ants;
+
 Graph* createGraph(int size);
 void displayGraph(Graph* graph);
 void addNode(Graph* graph, char * Nan, int x , int y, bool isStart, bool isEnd);
@@ -114,8 +121,12 @@ bool resizeGraph(Graph* graph, int newSize);
 
 //Algorithmes
 Path* find_path(Graph* graph);
+Path **findAllPaths(Graph* graph, int *count);
 Path *build_path(Graph *graph, int end_index);
 
 //Mouvements des fourmis
 void antsMovements(Graph *graph, Path *path);
+void multiplePaths(Graph *graph, Path **paths, int pathCount);
+void assignAnts(Path **paths, int path_count, int total_ants);
+
 #endif

@@ -59,3 +59,53 @@ Path *find_path(Graph* graph)
 	return build_path(graph, end);
 }
 
+Path **findAllPaths(Graph* graph, int *count) {
+	int max_capacity = graph->node_count * 2;
+	Path **paths = ft_arnalloc(sizeof(Path*) * max_capacity);
+	if (!paths) return NULL;
+
+	int pathCount = 0;
+
+	// 🔍 Connexions à start et end
+	Node *start_node = getStartNode(graph);
+	Node *end_node = getEndNode(graph);
+	int max_paths = 0;
+
+	if (start_node && end_node)
+	{
+		int start_index = findNodeByName(graph, start_node->Nan);
+		int end_index = findNodeByName(graph, end_node->Nan);
+		int start_conn = 0, end_conn = 0;
+
+		getNeighbors(graph, start_index, &start_conn);
+		getNeighbors(graph, end_index, &end_conn);
+
+		max_paths = (start_conn < end_conn) ? start_conn : end_conn + 1;
+	}
+
+	while (1)
+	{
+		if (pathCount >= max_paths || pathCount >= max_capacity)
+			break;
+
+		Path *path = find_path(graph);
+		if (!path)
+			break;
+
+		paths[pathCount++] = path;
+
+		// Supprimer les liens internes (sauf start/end)
+		for (int i = 0; i < path->len - 1; i++)
+		{
+			Node *a = getNodeByIndex(graph, path->nodes[i]);
+			Node *b = getNodeByIndex(graph, path->nodes[i + 1]);
+			if (!a->isStart && !b->isEnd)
+				removeEdge(graph, path->nodes[i], path->nodes[i + 1]);
+		}
+		resetNodePositions(graph);
+	}
+
+	*count = pathCount;
+	return paths;
+}
+
