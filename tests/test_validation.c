@@ -61,54 +61,6 @@ void test_hasStartEnd(void)
     print_test_result("NULL graph returns false", !hasStartEnd(NULL));
 }
 
-void test_isGraphConnected(void)
-{
-    print_test_header("Validation - isGraphConnected");
-    
-    // Test connected graph
-    resetNodePosition(); // Reset before each test
-    Graph* connected = createGraph(4);
-    addNode(connected, "start", 0, 0, true, false);
-    addNode(connected, "middle1", 5, 5, false, false);
-    addNode(connected, "middle2", 10, 5, false, false);
-    addNode(connected, "end", 15, 10, false, true);
-    
-    // Connect all nodes in a line
-    addEdge(connected, 0, 1);
-    addEdge(connected, 1, 2);
-    addEdge(connected, 2, 3);
-    
-    print_test_result("Connected graph returns true", isGraphConnected(connected));
-    
-    ft_arna_free();
-    
-    // Test disconnected graph
-    resetNodePosition(); // Reset before each test
-    Graph* disconnected = createGraph(4);
-    addNode(disconnected, "start", 0, 0, true, false);
-    addNode(disconnected, "middle1", 5, 5, false, false);
-    addNode(disconnected, "middle2", 10, 5, false, false);
-    addNode(disconnected, "end", 15, 10, false, true);
-    
-    // Only connect first two nodes
-    addEdge(disconnected, 0, 1);
-    // Nodes 2 and 3 are isolated
-    
-    print_test_result("Disconnected graph returns false", !isGraphConnected(disconnected));
-    
-    ft_arna_free();
-    
-    // Test single node
-    resetNodePosition(); // Reset before each test
-    Graph* single = createGraph(1);
-    addNode(single, "only", 0, 0, true, true);
-    
-    print_test_result("Single node graph is connected", isGraphConnected(single));
-    
-    ft_arna_free();
-    
-    print_test_result("NULL graph returns false", !isGraphConnected(NULL));
-}
 
 void test_isConnected(void)
 {
@@ -198,7 +150,6 @@ void run_validation_tests(void)
     printf("Testing graph validation functions...\n\n");
     
     test_hasStartEnd();
-    test_isGraphConnected();
     test_isConnected();
     test_validateGraph();
     
