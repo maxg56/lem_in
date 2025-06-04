@@ -21,8 +21,8 @@ bool parseConnection(Graph* graph, char* line) {
     }
     
     // Trim newline characters from tokens
-    char *name1 = ft_strtrim(tokens[0], " \t\n\r");
-    char *name2 = ft_strtrim(tokens[1], " \t\n\r");
+    char *name1 = ft_arn_strtrim(tokens[0], " \t\n\r");
+    char *name2 = ft_arn_strtrim(tokens[1], " \t\n\r");
     
     if (!name1 || !name2 || !name1[0] || !name2[0]) {
         set_parsing_error(ERROR_LINK_FORMAT, "Noms de salles vides dans le lien");
