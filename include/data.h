@@ -47,6 +47,7 @@ typedef struct Node {
     int x;
     int y;
     int parentNode;
+    int antCount;
     struct Node* next;
 } Node;
 

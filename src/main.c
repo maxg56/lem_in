@@ -34,13 +34,13 @@ int main(int argc, char *argv[]) {
     // printf("Number of ants: %d\n", graph->nb_fourmis);
     
     // // Afficher le graphe parsé
-    displayGraph(graph);
+    // displayGraph(graph);
     // Path *path = find_path(graph, NULL);
 
 	// Affichage du chemin
-    printf("Nombre de noeuds : %d\n", graph->node_count);
-    printf("Capacité du graphe : %d\n", graph->size);
-    printf("Nombre de fourmis : %d\n", graph->nb_fourmis);
+    // printf("Nombre de noeuds : %d\n", graph->node_count);
+    // printf("Capacité du graphe : %d\n", graph->size);
+    // printf("Nombre de fourmis : %d\n", graph->nb_fourmis);
     
     // Trouver tous les chemins disponibles
     int path_count = 0;
@@ -57,13 +57,13 @@ int main(int argc, char *argv[]) {
 
     // Affichage des chemins et des fourmis assignées
     for (int i = 0; i < path_count; i++) {
-        ft_printf("Chemin %d (%d salles, %d fourmis) : ", i + 1, paths[i]->len, paths[i]->assigned_ants);
+        // ft_printf("Chemin %d (%d salles, %d fourmis) : ", i + 1, paths[i]->len, paths[i]->assigned_ants);
         for (int j = 0; j < paths[i]->len; j++) {
             Node *node = getNodeByIndex(graph, paths[i]->nodes[j]);
             ft_putstr_fd(node->Nan, 1);
-            if (j < paths[i]->len - 1) {
-                ft_putstr_fd(" -> ", 1);
-            }
+            // if (j < paths[i]->len - 1) {
+            //     ft_putstr_fd(" -> ", 1);
+            // }
         }
         ft_putchar_fd('\n', 1);
     }
