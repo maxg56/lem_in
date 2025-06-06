@@ -1,25 +1,28 @@
 #include "lem-in.h"
 
-void resetNodePositions(Graph *graph) {
+void resetNodePositions(Graph *graph)
+{
 	if (!graph) return;
-	for (int i = 0; i < graph->node_count; i++) {
+	for (int i = 0; i < graph->node_count; i++)
+	{
 		Node *node = getNodeByIndex(graph, i);
-		if (node) {
+		if (node)
+		{
 			node->visited = false;
 			node->parentNode = -1;
 		}
 	}
 }
 
-Path *find_path(Graph* graph)
+Path *find_path(Graph *graph, bool *used_nodes)
 {
 	resetNodePositions(graph);
 
-	Node* startNode = getStartNode(graph);
-	Node* endNode = getEndNode(graph);
+	Node *startNode = getStartNode(graph);
+	Node *endNode = getEndNode(graph);
 	if (!startNode || !endNode)
 		return NULL;
-
+	
 	int start = findNodeByName(graph, startNode->Nan);
 	int end = findNodeByName(graph, endNode->Nan);
 	if (start == -1 || end == -1)
@@ -36,18 +39,24 @@ Path *find_path(Graph* graph)
 		int current_index = queue[front++];
 		if (current_index == end)
 			break;
-
+		
 		int count = 0;
-		Node** neighbors = getNeighbors(graph, current_index, &count);
+		Node **neighbors = getNeighbors(graph, current_index, &count);
 		for (int i = 0; i < count; i++)
 		{
 			int ni = findNodeByName(graph, neighbors[i]->Nan);
 			if (ni != -1 && !neighbors[i]->visited)
 			{
-				neighbors[i]->visited = true;
-				neighbors[i]->parentNode = current_index;
-				if (rear < graph->node_count) { // Prevent queue overflow
-					queue[rear++] = ni;
+				bool can_use = true;
+				if (!neighbors[i]->isStart && !neighbors[i]->isEnd && used_nodes[ni])
+					can_use = false;
+					
+				if (can_use)
+				{
+					neighbors[i]->visited = true;
+					neighbors[i]->parentNode = current_index;
+					if (rear < graph->node_count)
+						queue[rear++] = ni;
 				}
 			}
 		}
@@ -59,14 +68,19 @@ Path *find_path(Graph* graph)
 	return build_path(graph, end);
 }
 
-Path **findAllPaths(Graph* graph, int *count) {
+Path **findAllPaths(Graph *graph, int *count)
+{
 	int max_capacity = graph->node_count * 2;
 	Path **paths = ft_arnalloc(sizeof(Path*) * max_capacity);
-	if (!paths) return NULL;
+	if (!paths)
+		return NULL;
+
+	bool used_nodes[graph->node_count];
+	for (int i = 0; i < graph->node_count; i++)
+		used_nodes[i] = false;
 
 	int pathCount = 0;
 
-	// 🔍 Connexions à start et end
 	Node *start_node = getStartNode(graph);
 	Node *end_node = getEndNode(graph);
 	int max_paths = 0;
@@ -80,32 +94,65 @@ Path **findAllPaths(Graph* graph, int *count) {
 		getNeighbors(graph, start_index, &start_conn);
 		getNeighbors(graph, end_index, &end_conn);
 
-		max_paths = (start_conn < end_conn) ? start_conn : end_conn + 1;
+		max_paths = (start_conn < end_conn) ? start_conn : end_conn;
 	}
-
-	while (1)
+	int attempt = 0;
+	int max_attempts = max_paths + 2;
+	while (pathCount < max_paths && attempt < max_attempts)
 	{
-		if (pathCount >= max_paths || pathCount >= max_capacity)
+		ft_printf("\n--- Tentative %d ---\n", attempt + 1);
+		
+		ft_printf("Nœuds utilisés: ");
+		for (int i = 0; i < graph->node_count; i++) {
+			if (used_nodes[i]) {
+				Node *node = getNodeByIndex(graph, i);
+				ft_printf("%s ", node->Nan);
+			}
+		}
+		ft_printf("\n");
+		
+		Path *path = find_path(graph, used_nodes);
+		if (!path) {
+			ft_printf("Aucun chemin trouvé, arrêt.\n");
 			break;
-
-		Path *path = find_path(graph);
-		if (!path)
+		}
+		bool is_duplicate = false;
+		for (int existing = 0; existing < pathCount; existing++) {
+			if (paths[existing]->len == path->len) {
+				bool same = true;
+				for (int j = 0; j < path->len; j++) {
+					if (paths[existing]->nodes[j] != path->nodes[j]) {
+						same = false;
+						break;
+					}
+				}
+				if (same) {
+					is_duplicate = true;
+					ft_printf("Chemin doublon détecté, ignoré.\n");
+					break;
+				}
+			}
+		}
+		
+		if (is_duplicate)
 			break;
+		for (int j = 1; j < path->len - 1; j++)
+			used_nodes[path->nodes[j]] = true;
 
 		paths[pathCount++] = path;
-
-		// Supprimer les liens internes (sauf start/end)
-		for (int i = 0; i < path->len - 1; i++)
-		{
-			Node *a = getNodeByIndex(graph, path->nodes[i]);
-			Node *b = getNodeByIndex(graph, path->nodes[i + 1]);
-			if (!a->isStart && !b->isEnd)
-				removeEdge(graph, path->nodes[i], path->nodes[i + 1]);
+		
+		ft_printf("Chemin %d accepté: ", pathCount);
+		for (int k = 0; k < path->len; k++) {
+			Node *node = getNodeByIndex(graph, path->nodes[k]);
+			ft_printf("%s", node->Nan);
+			if (k < path->len - 1) ft_printf(" -> ");
 		}
+		ft_printf(" (longueur: %d)\n", path->len);
+		
 		resetNodePositions(graph);
+		attempt++;
 	}
-
+	
 	*count = pathCount;
 	return paths;
 }
-

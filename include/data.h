@@ -75,6 +75,8 @@ Graph* createGraph(int size);
 void displayGraph(Graph* graph);
 void addNode(Graph* graph, char * Nan, int x , int y, bool isStart, bool isEnd);
 void resetNodePosition(void);
+void print_map(void);
+void simulate_ants(Graph *graph, Path **paths, int path_count, int ant_count);
 
 // Gestion des connexions/arêtes
 void addEdge(Graph* graph, int nodeA, int nodeB);
@@ -120,7 +122,7 @@ bool is_empty_line_valid(const char *line, bool end_of_file);
 bool resizeGraph(Graph* graph, int newSize);
 
 //Algorithmes
-Path* find_path(Graph* graph);
+Path *find_path(Graph *graph, bool *used_nodes);
 Path **findAllPaths(Graph* graph, int *count);
 Path *build_path(Graph *graph, int end_index);
 
