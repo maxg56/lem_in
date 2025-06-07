@@ -5,3 +5,4 @@ lem_in_*
 .compiled_count
 vgcore.*
 .compiled_count
+__pycache__
