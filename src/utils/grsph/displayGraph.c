@@ -10,9 +10,9 @@ void displayGraph(Graph* graph) {
         Node* currentNode = graph->adjacencyList[i];
         if (currentNode) {
             printf("Node %d: %s (x: %d, y: %d, Start: %s, End: %s)\n", 
-                   i, currentNode->Nan, currentNode->x, currentNode->y,
-                   currentNode->isStart ? "Yes" : "No",
-                   currentNode->isEnd ? "Yes" : "No");
+                i, currentNode->Nan, currentNode->x, currentNode->y,
+                currentNode->isStart ? "Yes" : "No",
+                currentNode->isEnd ? "Yes" : "No");
             
             // Display connections
             Node* connection = currentNode->next;

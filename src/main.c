@@ -35,27 +35,43 @@ int main(int argc, char *argv[]) {
     
     // // Afficher le graphe parsé
     // displayGraph(graph);
-    Path *path = find_path(graph);
+    // Path *path = find_path(graph, NULL);
 
 	// Affichage du chemin
-        if (path)
-        {
-            ft_putstr_fd("Chemin trouvé : ", 1);
-            for (int i = 0; i < path->len; i++)
-            {
-                Node *node = getNodeByIndex(graph, path->nodes[i]);
-                ft_putstr_fd(node->Nan, 1);
-                if (i < path->len - 1)
-                    ft_putstr_fd(" -> ", 1);
-            }
-            ft_putchar_fd('\n', 1);
-            antsMovements(graph, path);
-        }
-        else
-            ft_putstr_fd("Aucun chemin trouvé.\n", 2);
+    // printf("Nombre de noeuds : %d\n", graph->node_count);
+    // printf("Capacité du graphe : %d\n", graph->size);
+    // printf("Nombre de fourmis : %d\n", graph->nb_fourmis);
     
-    // Free allocated resources if necessary
-    // For example, if you had dynamically allocated memory in the graph structure
+    // Trouver tous les chemins disponibles
+    int path_count = 0;
+    Path **paths = findAllPaths(graph, &path_count);
+
+    if (!paths || path_count == 0) {
+        ft_putstr_fd("Aucun chemin trouvé.\n", 2);
+        ft_arna_free();
+        return EXIT_FAILURE;
+    }
+
+    // Assigner les fourmis aux chemins
+    assignAnts(paths, path_count, graph->nb_fourmis);
+
+    // Affichage des chemins et des fourmis assignées
+    for (int i = 0; i < path_count; i++) {
+        // ft_printf("Chemin %d (%d salles, %d fourmis) : ", i + 1, paths[i]->len, paths[i]->assigned_ants);
+        for (int j = 0; j < paths[i]->len; j++) {
+            Node *node = getNodeByIndex(graph, paths[i]->nodes[j]);
+            ft_putstr_fd(node->Nan, 1);
+            // if (j < paths[i]->len - 1) {
+            //     ft_putstr_fd(" -> ", 1);
+            // }
+        }
+        ft_putchar_fd('\n', 1);
+    }
+
+    // Traitement des chemins multiples
+    multiplePaths(graph, paths, path_count);
+
+    // Libérer la mémoire allouée
     ft_arna_free();
     return EXIT_SUCCESS;
 }
