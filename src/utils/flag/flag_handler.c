@@ -1,4 +1,5 @@
 #include "lem-in.h"
+#include <stdarg.h>
 
 // Structure pour gérer les flags
 typedef struct {
@@ -125,7 +126,6 @@ bool is_visual(void) { return g_flags.visual; }
 void debug_printf(const char *format, ...) {
     if (is_debug()) {
         ft_putstr_fd("[DEBUG] ", 2);
-        // Vous pouvez utiliser ft_printf si disponible, sinon ft_putstr_fd
         ft_putstr_fd((char*)format, 2);
     }
 }

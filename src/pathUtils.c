@@ -79,34 +79,111 @@ void	multiplePaths(Graph *graph, Path **paths, int pathCount)
 	int nextAntId = 1;
 	int antsArrived = 0;
 	t_list *activeAnts = NULL;
+	
+	// Tableau pour suivre les positions occupées à chaque tour
+	bool *nodeOccupied = ft_arnalloc(sizeof(bool) * graph->node_count);
+	
 	while (antsArrived < totalAnts)
 	{
+		// Réinitialiser les positions occupées
+		for (int i = 0; i < graph->node_count; i++) {
+			nodeOccupied[i] = false;
+		}
+		
+		// Marquer le noeud de départ comme occupé s'il y a des fourmis en attente
+		Node *startNode = getStartNode(graph);
+		int startIndex = findNodeByName(graph, startNode->Nan);
+		if (startIndex != -1) {
+			nodeOccupied[startIndex] = true;
+		}
+		
+		// Première passe : déplacer les fourmis existantes
 		t_list *tmp = activeAnts;
+		t_list *toRemove = NULL;
+		
 		while (tmp)
 		{
-			Ants *a = tmp->content;
-			a->position++;
-			if(a->position < paths[a->path_index]->len)
-			{
-				Node *room = getNodeByIndex(graph, paths[a->path_index]->nodes[a->position]);
-				ft_printf("L%d-%s ", a->id, room->Nan);
-			}
-			else
+			Ants *ant = tmp->content;
+			bool antMoved = false;
+			
+			// Vérifier si la fourmi peut avancer
+			if (ant->position + 1 < paths[ant->path_index]->len) {
+				int nextPosition = paths[ant->path_index]->nodes[ant->position + 1];
+				
+				// Vérifier si la position suivante est libre
+				if (!nodeOccupied[nextPosition]) {
+					ant->position++;
+					nodeOccupied[nextPosition] = true;
+					antMoved = true;
+					
+					Node *room = getNodeByIndex(graph, nextPosition);
+					ft_printf("L%d-%s ", ant->id, room->Nan);
+				}
+			} else {
+				// La fourmi a atteint la fin
 				antsArrived++;
+				antMoved = true;
+				
+				// Marquer cette fourmi pour suppression
+				t_list *nodeToRemove = ft_lstnew(tmp);
+				ft_lstadd_back(&toRemove, nodeToRemove);
+			}
+			
+			// Si la fourmi n'a pas bougé, elle reste à sa position actuelle
+			if (!antMoved && ant->position < paths[ant->path_index]->len) {
+				int currentPosition = paths[ant->path_index]->nodes[ant->position];
+				nodeOccupied[currentPosition] = true;
+			}
+			
 			tmp = tmp->next;
 		}
+		
+		// Supprimer les fourmis arrivées
+		while (toRemove) {
+			t_list *antNode = (t_list*)toRemove->content;
+			t_list *prev = NULL;
+			t_list *current = activeAnts;
+			
+			// Trouver et supprimer le nœud
+			while (current && current != antNode) {
+				prev = current;
+				current = current->next;
+			}
+			
+			if (current) {
+				if (prev) {
+					prev->next = current->next;
+				} else {
+					activeAnts = current->next;
+				}
+			}
+			
+			t_list *toRemoveNext = toRemove->next;
+			toRemove = toRemoveNext;
+		}
+		
+		// Deuxième passe : ajouter de nouvelles fourmis si possible
 		for (int i = 0; i < pathCount && nextAntId <= totalAnts; i++)
 		{
-			if(paths[i]->assigned_ants > 0)
+			if (paths[i]->assigned_ants > 0)
 			{
-				Ants *newAnt = ft_arnalloc(sizeof(Ants));
-				newAnt->id = nextAntId++;
-				newAnt->path_index = i;
-				newAnt->position = 0;
-				ft_lstadd_back(&activeAnts, ft_lstnew(newAnt));
-				paths[i]->assigned_ants--;
-				Node *room = getNodeByIndex(graph, paths[i]->nodes[0]);
-				ft_printf("L%d-%s ", newAnt->id, room->Nan);
+				// Vérifier si la première position du chemin est libre
+				int firstPosition = paths[i]->nodes[0];
+				if (!nodeOccupied[firstPosition])
+				{
+					Ants *newAnt = ft_arnalloc(sizeof(Ants));
+					newAnt->id = nextAntId++;
+					newAnt->path_index = i;
+					newAnt->position = 0;
+					newAnt->arrived = false;
+					
+					ft_lstadd_back(&activeAnts, ft_lstnew(newAnt));
+					paths[i]->assigned_ants--;
+					nodeOccupied[firstPosition] = true;
+					
+					Node *room = getNodeByIndex(graph, firstPosition);
+					ft_printf("L%d-%s ", newAnt->id, room->Nan);
+				}
 			}
 		}
 		ft_putchar_fd('\n', 1);

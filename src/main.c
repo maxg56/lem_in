@@ -2,10 +2,14 @@
 #include <stdio.h>
 #include <time.h>
 
+static void display_paths_if_needed(Graph *graph, Path **paths, int path_count);
+static void execute_ant_simulation(Graph *graph, Path **paths, int path_count);
+static void display_final_statistics(Graph *graph, int path_count, clock_t start_time);
+
 int main(int argc, char *argv[]) {
     Graph* graph = NULL;
     char *filename = NULL;
-    clock_t start_time = 0, end_time = 0;
+    clock_t start_time = 0;
     
     // Initialiser les flags
     init_flags();
@@ -56,9 +60,15 @@ int main(int argc, char *argv[]) {
     verbose_printf("Parsing completed successfully\n");
     
     if (is_debug()) {
-        debug_printf("Number of nodes: %d\n", graph->node_count);
-        debug_printf("Graph capacity: %d\n", graph->size);
-        debug_printf("Number of ants: %d\n", graph->nb_fourmis);
+        debug_printf("Number of nodes: ");
+        ft_putnbr_fd(graph->node_count, 1);
+        ft_putchar_fd('\n', 1);
+        debug_printf("Graph capacity: ");
+        ft_putnbr_fd(graph->size, 1);
+        ft_putchar_fd('\n', 1);
+        debug_printf("Number of ants: ");
+        ft_putnbr_fd(graph->nb_fourmis, 1);
+        ft_putchar_fd('\n', 1);
     }
     
     // Affichage du graphe si en mode debug
@@ -80,18 +90,44 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    verbose_printf("Chemins trouvés: %d\n", path_count);
+    verbose_printf("Chemins trouvés: ");
+    if (is_verbose() && !is_quiet()) {
+        ft_putnbr_fd(path_count, 1);
+        ft_putchar_fd('\n', 1);
+    }
 
     // Assigner les fourmis aux chemins
     verbose_printf("Attribution des fourmis aux chemins...\n");
     assignAnts(paths, path_count, graph->nb_fourmis);
 
-    // Affichage des chemins selon les flags
+    // Afficher les chemins trouvés si demandé
+    display_paths_if_needed(graph, paths, path_count);
+    
+    // Exécuter la simulation des fourmis
+    execute_ant_simulation(graph, paths, path_count);
+    
+    // Afficher les statistiques et benchmark si demandés
+    display_final_statistics(graph, path_count, start_time);
+
+    // Libérer la mémoire allouée
+    ft_arna_free();
+    return EXIT_SUCCESS;
+}
+
+// Fonctions auxiliaires pour nettoyer le main
+static void display_paths_if_needed(Graph *graph, Path **paths, int path_count)
+{
     if (show_paths() || is_debug()) {
         if (!is_quiet()) {
             for (int i = 0; i < path_count; i++) {
                 if (is_debug()) {
-                    debug_printf("Chemin %d (%d salles, %d fourmis) : ", i + 1, paths[i]->len, paths[i]->assigned_ants);
+                    debug_printf("Chemin ");
+                    ft_putnbr_fd(i + 1, 1);
+                    ft_putstr_fd(" (", 1);
+                    ft_putnbr_fd(paths[i]->len, 1);
+                    ft_putstr_fd(" salles, ", 1);
+                    ft_putnbr_fd(paths[i]->assigned_ants, 1);
+                    ft_putstr_fd(" fourmis) : ", 1);
                 }
                 for (int j = 0; j < paths[i]->len; j++) {
                     Node *node = getNodeByIndex(graph, paths[i]->nodes[j]);
@@ -113,18 +149,16 @@ int main(int argc, char *argv[]) {
             ft_putchar_fd('\n', 1);
         }
     }
+}
 
-    // Traitement des chemins multiples
+static void execute_ant_simulation(Graph *graph, Path **paths, int path_count)
+{
     verbose_printf("Simulation du mouvement des fourmis...\n");
-    
-    // Capturer le temps avant la simulation si benchmark
-    clock_t sim_start = 0;
-    if (is_benchmark()) {
-        sim_start = clock();
-    }
-    
     multiplePaths(graph, paths, path_count);
-    
+}
+
+static void display_final_statistics(Graph *graph, int path_count, clock_t start_time)
+{
     // Afficher les statistiques si demandées
     if (show_stats() && !is_quiet()) {
         ft_putstr_fd("\n=== STATISTIQUES ===\n", 1);
@@ -141,25 +175,15 @@ int main(int argc, char *argv[]) {
     
     // Afficher le temps d'exécution si benchmark
     if (is_benchmark()) {
-        end_time = clock();
+        clock_t end_time = clock();
         double total_time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
-        double sim_time = ((double)(end_time - sim_start)) / CLOCKS_PER_SEC;
         
         if (!is_quiet()) {
             ft_putstr_fd("\n=== BENCHMARK ===\n", 1);
             ft_putstr_fd("Temps total: ", 1);
-            // Note: ft_printf n'étant peut-être pas disponible, affichage simplifié
             ft_putstr_fd("~", 1);
             ft_putnbr_fd((int)(total_time * 1000), 1);
             ft_putstr_fd("ms\n", 1);
-            ft_putstr_fd("Temps simulation: ", 1);
-            ft_putstr_fd("~", 1);
-            ft_putnbr_fd((int)(sim_time * 1000), 1);
-            ft_putstr_fd("ms\n", 1);
         }
     }
-
-    // Libérer la mémoire allouée
-    ft_arna_free();
-    return EXIT_SUCCESS;
 }
