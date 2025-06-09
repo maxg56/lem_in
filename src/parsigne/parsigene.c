@@ -77,6 +77,11 @@ Graph* parsigense(int fd) {
         
         // Ignorer les autres commentaires
         if (trimmed_line[0] == '#') {
+            // Vérifier si on attendait une salle après ##start ou ##end
+            if (expecting_start_room || expecting_end_room) {
+                set_parsing_error(ERROR_COMMAND_NOT_FOLLOWED, "##start ou ##end non suivis d'une vraie salle");
+                return NULL;
+            }
             continue;
         }
         
