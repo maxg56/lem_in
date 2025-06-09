@@ -3,6 +3,7 @@
 
 # include "data.h"
 # include "libft.h"
+#include <stdarg.h>
 #include <fcntl.h>  // Pour open()
 #include <unistd.h> // Pour close()
 
@@ -24,7 +25,8 @@ bool show_stats(void);
 bool is_help(void);
 bool is_quiet(void);
 bool is_benchmark(void);
-bool is_visual(void);
+bool show_used_paths(void);
+bool show_all_paths(void);
 
 // Fonctions d'affichage conditionnelles
 void debug_printf(const char *format, ...);

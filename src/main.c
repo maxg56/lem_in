@@ -11,15 +11,12 @@ int main(int argc, char *argv[]) {
     char *filename = NULL;
     clock_t start_time = 0;
     
-    // Initialiser les flags
     init_flags();
     
-    // Parser les flags et arguments
     if (!parse_flags(argc, argv, &filename)) {
         return EXIT_FAILURE;
     }
     
-    // Afficher l'aide si demandée
     if (is_help()) {
         print_usage(argv[0]);
         return EXIT_SUCCESS;
@@ -31,10 +28,10 @@ int main(int argc, char *argv[]) {
         verbose_printf("Démarrage du benchmark...\n");
     }
     
-    // Clear any previous parsing errors
     clear_parsing_error();
     
     verbose_printf("Début du parsing...\n");
+    
     
     if (filename) {
         debug_printf("Lecture du fichier: %s\n", filename);
@@ -96,20 +93,11 @@ int main(int argc, char *argv[]) {
         ft_putchar_fd('\n', 1);
     }
 
-    // Assigner les fourmis aux chemins
     verbose_printf("Attribution des fourmis aux chemins...\n");
     assignAnts(paths, path_count, graph->nb_fourmis);
-
-    // Afficher les chemins trouvés si demandé
     display_paths_if_needed(graph, paths, path_count);
-    
-    // Exécuter la simulation des fourmis
     execute_ant_simulation(graph, paths, path_count);
-    
-    // Afficher les statistiques et benchmark si demandés
     display_final_statistics(graph, path_count, start_time);
-
-    // Libérer la mémoire allouée
     ft_arna_free();
     return EXIT_SUCCESS;
 }
@@ -117,7 +105,52 @@ int main(int argc, char *argv[]) {
 // Fonctions auxiliaires pour nettoyer le main
 static void display_paths_if_needed(Graph *graph, Path **paths, int path_count)
 {
-    if (show_paths() || is_debug()) {
+    // Afficher tous les chemins trouvés avec --all-paths
+    if (show_all_paths() && !is_quiet()) {
+        ft_putstr_fd("\n=== TOUS LES CHEMINS TROUVÉS ===\n", 1);
+        for (int i = 0; i < path_count; i++) {
+            ft_putstr_fd("Chemin ", 1);
+            ft_putnbr_fd(i + 1, 1);
+            ft_putstr_fd(" (", 1);
+            ft_putnbr_fd(paths[i]->len, 1);
+            ft_putstr_fd(" salles) : ", 1);
+            for (int j = 0; j < paths[i]->len; j++) {
+                Node *node = getNodeByIndex(graph, paths[i]->nodes[j]);
+                ft_putstr_fd(node->Nan, 1);
+                if (j < paths[i]->len - 1) {
+                    ft_putstr_fd(" -> ", 1);
+                }
+            }
+            ft_putchar_fd('\n', 1);
+        }
+    }
+    
+    // Afficher seulement les chemins utilisés avec --used-paths
+    if (show_used_paths() && !is_quiet()) {
+        ft_putstr_fd("\n=== CHEMINS UTILISÉS ===\n", 1);
+        for (int i = 0; i < path_count; i++) {
+            if (paths[i]->assigned_ants > 0) {
+                ft_putstr_fd("Chemin ", 1);
+                ft_putnbr_fd(i + 1, 1);
+                ft_putstr_fd(" (", 1);
+                ft_putnbr_fd(paths[i]->len, 1);
+                ft_putstr_fd(" salles, ", 1);
+                ft_putnbr_fd(paths[i]->assigned_ants, 1);
+                ft_putstr_fd(" fourmis) : ", 1);
+                for (int j = 0; j < paths[i]->len; j++) {
+                    Node *node = getNodeByIndex(graph, paths[i]->nodes[j]);
+                    ft_putstr_fd(node->Nan, 1);
+                    if (j < paths[i]->len - 1) {
+                        ft_putstr_fd(" -> ", 1);
+                    }
+                }
+                ft_putchar_fd('\n', 1);
+            }
+        }
+    }
+    
+    // Comportement existant pour -p et -d
+    if ((show_paths() || is_debug()) && !show_all_paths() && !show_used_paths()) {
         if (!is_quiet()) {
             for (int i = 0; i < path_count; i++) {
                 if (is_debug()) {
@@ -138,15 +171,6 @@ static void display_paths_if_needed(Graph *graph, Path **paths, int path_count)
                 }
                 ft_putchar_fd('\n', 1);
             }
-        }
-    } else if (!is_visual()) {
-        // Mode normal: afficher seulement le chemin principal
-        for (int i = 0; i < path_count; i++) {
-            for (int j = 0; j < paths[i]->len; j++) {
-                Node *node = getNodeByIndex(graph, paths[i]->nodes[j]);
-                ft_putstr_fd(node->Nan, 1);
-            }
-            ft_putchar_fd('\n', 1);
         }
     }
 }
@@ -171,6 +195,7 @@ static void display_final_statistics(Graph *graph, int path_count, clock_t start
         ft_putstr_fd("Nombre de salles: ", 1);
         ft_putnbr_fd(graph->node_count, 1);
         ft_putchar_fd('\n', 1);
+        ft_putstr_fd("Algorithme de recherche: BFS (Breadth-First Search)\n", 1);
     }
     
     // Afficher le temps d'exécution si benchmark

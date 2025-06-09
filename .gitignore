@@ -1,7 +1,7 @@
 .tmp/
 *.o
 lem_in
-lem_in_*
+lem_in_tests
 .compiled_count
 vgcore.*
 .compiled_count

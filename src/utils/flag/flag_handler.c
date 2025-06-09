@@ -1,5 +1,5 @@
 #include "lem-in.h"
-#include <stdarg.h>
+
 
 // Structure pour gérer les flags
 typedef struct {
@@ -10,7 +10,8 @@ typedef struct {
     bool help;             // -h : afficher l'aide
     bool quiet;            // -q : mode silencieux
     bool benchmark;        // -b : mode benchmark/timing
-    bool visual;           // --visual : mode visuel pour le web
+    bool show_used_paths;  // --used-paths : afficher seulement les chemins utilisés
+    bool show_all_paths;   // --all-paths : afficher tous les chemins trouvés
 } Flags;
 
 static Flags g_flags = {0};
@@ -23,9 +24,9 @@ void init_flags(void) {
     g_flags.help = false;
     g_flags.quiet = false;
     g_flags.benchmark = false;
-    g_flags.visual = false;
+    g_flags.show_used_paths = false;
+    g_flags.show_all_paths = false;
 }
-
 
 bool parse_flags(int argc, char *argv[], char **filename) {
     int i = 1;
@@ -55,8 +56,11 @@ bool parse_flags(int argc, char *argv[], char **filename) {
             else if (ft_strcmp(argv[i], "-b") == 0 || ft_strcmp(argv[i], "--benchmark") == 0) {
                 g_flags.benchmark = true;
             }
-            else if (ft_strcmp(argv[i], "--visual") == 0) {
-                g_flags.visual = true;
+            else if (ft_strcmp(argv[i], "--used-paths") == 0) {
+                g_flags.show_used_paths = true;
+            }
+            else if (ft_strcmp(argv[i], "--all-paths") == 0) {
+                g_flags.show_all_paths = true;
             }
             else {
                 ft_putstr_fd("Erreur: Flag inconnu '", 2);
@@ -81,36 +85,7 @@ bool parse_flags(int argc, char *argv[], char **filename) {
     return true;
 }
 
-void print_usage(const char *program_name) {
-    ft_putstr_fd("Usage: ", 1);
-    ft_putstr_fd((char*)program_name, 1);
-    ft_putstr_fd(" [OPTIONS] [FICHIER]\n\n", 1);
-    
-    ft_putstr_fd("DESCRIPTION:\n", 1);
-    ft_putstr_fd("  Résout le problème lem-in en trouvant le chemin optimal pour faire\n", 1);
-    ft_putstr_fd("  passer toutes les fourmis du début à la fin.\n\n", 1);
-    
-    ft_putstr_fd("OPTIONS:\n", 1);
-    ft_putstr_fd("  -v, --verbose    Affichage détaillé du processus\n", 1);
-    ft_putstr_fd("  -d, --debug      Mode debug avec informations techniques\n", 1);
-    ft_putstr_fd("  -p, --paths      Afficher les chemins trouvés\n", 1);
-    ft_putstr_fd("  -s, --stats      Afficher les statistiques (nombre de tours, etc.)\n", 1);
-    ft_putstr_fd("  -q, --quiet      Mode silencieux (sortie minimale)\n", 1);
-    ft_putstr_fd("  -b, --benchmark  Mesurer le temps d'exécution\n", 1);
-    ft_putstr_fd("  --visual         Mode visuel pour interface web\n", 1);
-    ft_putstr_fd("  -h, --help       Afficher cette aide\n\n", 1);
-    
-    ft_putstr_fd("EXEMPLES:\n", 1);
-    ft_putstr_fd("  ", 1);
-    ft_putstr_fd((char*)program_name, 1);
-    ft_putstr_fd(" map.map                    # Résoudre avec map.map\n", 1);
-    ft_putstr_fd("  ", 1);
-    ft_putstr_fd((char*)program_name, 1);
-    ft_putstr_fd(" -v -p map.map             # Mode verbose avec affichage des chemins\n", 1);
-    ft_putstr_fd("  ", 1);
-    ft_putstr_fd((char*)program_name, 1);
-    ft_putstr_fd(" -s < map.map              # Statistiques en lisant depuis stdin\n", 1);
-}
+
 
 // Getters pour les flags
 bool is_verbose(void) { return g_flags.verbose; }
@@ -120,20 +95,5 @@ bool show_stats(void) { return g_flags.show_stats; }
 bool is_help(void) { return g_flags.help; }
 bool is_quiet(void) { return g_flags.quiet; }
 bool is_benchmark(void) { return g_flags.benchmark; }
-bool is_visual(void) { return g_flags.visual; }
-
-// Fonction pour afficher en mode debug
-void debug_printf(const char *format, ...) {
-    if (is_debug()) {
-        ft_putstr_fd("[DEBUG] ", 2);
-        ft_putstr_fd((char*)format, 2);
-    }
-}
-
-// Fonction pour afficher en mode verbose
-void verbose_printf(const char *format, ...) {
-    if (is_verbose() && !is_quiet()) {
-        ft_putstr_fd("[INFO] ", 1);
-        ft_putstr_fd((char*)format, 1);
-    }
-}
+bool show_used_paths(void) { return g_flags.show_used_paths; }
+bool show_all_paths(void) { return g_flags.show_all_paths; }
