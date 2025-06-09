@@ -122,20 +122,29 @@ bool is_empty_line_valid(const char *line, bool end_of_file);
 bool resizeGraph(Graph* graph, int newSize);
 
 //Algorithmes
+// BFS Algorithms
 Path *find_path(Graph *graph, bool *used_nodes);
-Path **findAllPaths(Graph* graph, int *count);
-void findAllPathsRecursive(Graph *graph, int current, int target, bool *visited, 
-                          int *current_path, int path_length, Path ***paths, 
-                          int *pathCount, int max_capacity);
-Path *build_path(Graph *graph, int end_index);
+Path *findShortestPathBFS(Graph *graph);
+void findPathsBFSSimple(Graph *graph, int start, int end, Path ***paths, int *pathCount, int max_capacity);
 
-// Fonctions d'optimisation
+// Path Optimization
+Path **findAllPaths(Graph* graph, int *count);
 void sortPathsByLength(Path **paths, int count);
 int calculateTurns(Path **paths, int path_count, int total_ants);
 bool arePathsDisjoint(Path *path1, Path *path2);
 Path **selectOptimalPaths(Path **all_paths, int total_count, int total_ants, int *selected_count);
 
-//Mouvements des fourmis
+// DFS Legacy (for compatibility)
+void findAllPathsRecursive(Graph *graph, int current, int target, bool *visited, 
+                          int *current_path, int path_length, Path ***paths, 
+                          int *pathCount, int max_capacity);
+
+// Ant Movement
+void resetNodePositions(Graph *graph);
+void moveAnts(Graph *graph, Path **paths, int pathCount);
+
+// Path utilities and simulation
+Path *build_path(Graph *graph, int end_index);
 void antsMovements(Graph *graph, Path *path);
 void multiplePaths(Graph *graph, Path **paths, int pathCount);
 void assignAnts(Path **paths, int path_count, int total_ants);

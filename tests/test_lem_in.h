@@ -58,6 +58,7 @@ void test_find_path_basic(void);
 void test_find_multiple_paths(void);
 void test_no_path_exists(void);
 void test_path_optimization(void);
+void test_path_utilities(void);
 
 // Integration tests
 void test_complete_simple_map(void);

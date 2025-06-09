@@ -36,7 +36,7 @@ void test_complete_simple_map(void)
     printf("        2 links: start-middle, middle-end\n");
     
     // Test lem-in execution with simple map
-    int result = system("./lem-in < test_map_simple.txt > test_output_simple.txt 2>&1");
+    int result = system("../lem-in < test_map_simple.txt > test_output_simple.txt 2>&1");
     print_test_result("Program executed successfully", result == 0);
     
     if (result == 0) {
@@ -103,7 +103,7 @@ void test_complete_complex_map(void)
     printf("        7 links forming a network\n");
     
     // Test lem-in execution with complex map
-    int result = system("./lem-in < test_map_complex.txt > test_output_complex.txt 2>&1");
+    int result = system("../lem-in < test_map_complex.txt > test_output_complex.txt 2>&1");
     print_test_result("Complex map executed successfully", result == 0);
     
     if (result == 0) {
@@ -189,7 +189,7 @@ void test_error_handling(void)
         
         // Test error handling - these should fail (non-zero exit code)
         char command[200];
-        sprintf(command, "./lem-in < %s > /dev/null 2>&1", filename);
+        sprintf(command, "../lem-in < %s > /dev/null 2>&1", filename);
         int result = system(command);
         
         // For error cases, we expect non-zero exit codes (failure)
