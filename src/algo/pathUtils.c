@@ -23,8 +23,8 @@ Path *build_path(Graph *graph, int end_index)
 		current_index = current_node->parentNode;
 		tmp[len++] = current_index;
 	}
-	if (len > 0)
-		len--; // retire le nœud start du chemin
+	
+	// Don't remove the start node - include it in the path
 	if (len == 0)
 		return NULL;
 	Path *path = ft_arnalloc(sizeof(Path));
@@ -33,7 +33,7 @@ Path *build_path(Graph *graph, int end_index)
 	path->nodes = ft_arnalloc(sizeof(int) * len);
 	if (!path->nodes)
 		return NULL;
-	for (int i = 0; i < len; i++)// Inverser pour avoir le chemin du début vers la fin (sans start)
+	for (int i = 0; i < len; i++) // Inverser pour avoir le chemin du début vers la fin (avec start)
 		path->nodes[i] = tmp[len - 1 - i];
 	path->len = len;
 	path->assigned_ants = 0;

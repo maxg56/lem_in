@@ -37,7 +37,8 @@ TEST_SRCS = test_main.c \
             test_integration.c \
             test_edge_management.c \
             test_search_navigation.c \
-            test_validation.c
+            test_validation.c \
+            test_input_files.c
 
 # Source files to test (your actual implementation)
 SRC_FILES = $(shell find ../src -iname "*.c" ! -name "main.c")
@@ -100,9 +101,18 @@ test-algorithms: all
 	@printf "$(YELLOW)Running algorithm tests...$(DEF_COLOR)\n"
 	@./$(TEST_NAME) algorithms
 
+test-input: all
+	@printf "$(YELLOW)Running input file tests...$(DEF_COLOR)\n"
+	@./$(TEST_NAME) input
+
 test-integration: all
 	@printf "$(YELLOW)Running integration tests...$(DEF_COLOR)\n"
 	@./$(TEST_NAME) integration
+
+# Debug target for minimal testing
+debug: libft
+	gcc $(CFLAGS) -I $(INCLUDE_DIR) -I $(LIBFT_DIR)/include \
+		$(SRC_FILES) ../debug_test.c -L $(LIBFT_DIR) -lft -o debug_test
 
 # Cleanup
 clean:
@@ -142,4 +152,4 @@ help:
 	@printf "  re                - Rebuild everything\n"
 	@printf "  help              - Show this help\n"
 
-.PHONY: all test test-graph test-edge test-search test-validation test-parsing test-algorithms test-integration clean fclean fclean-all re help libft
+.PHONY: all test test-graph test-edge test-search test-validation test-parsing test-algorithms test-integration clean fclean fclean-all re help libft debug

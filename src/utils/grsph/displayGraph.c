@@ -9,17 +9,26 @@ void displayGraph(Graph* graph) {
     for (int i = 0; i < graph->node_count; i++) {
         Node* currentNode = graph->adjacencyList[i];
         if (currentNode) {
-            printf("Node %d: %s (x: %d, y: %d, Start: %s, End: %s)\n", 
-                i, currentNode->Nan, currentNode->x, currentNode->y,
-                currentNode->isStart ? "Yes" : "No",
-                currentNode->isEnd ? "Yes" : "No");
+            // Add comprehensive safety checks
+            if (currentNode->Nan == NULL) {
+                printf("Node %d: [NULL_NAME] (x: %d, y: %d, Start: %s, End: %s)\n", 
+                    i, currentNode->x, currentNode->y,
+                    currentNode->isStart ? "Yes" : "No",
+                    currentNode->isEnd ? "Yes" : "No");
+            } else {
+                printf("Node %d: %s (x: %d, y: %d, Start: %s, End: %s)\n", 
+                    i, currentNode->Nan, currentNode->x, currentNode->y,
+                    currentNode->isStart ? "Yes" : "No",
+                    currentNode->isEnd ? "Yes" : "No");
+            }
             
             // Display connections
             Node* connection = currentNode->next;
             if (connection) {
                 printf("  Connections:");
                 while (connection) {
-                    printf(" -> %s", connection->Nan);
+                    const char* connectionName = (connection->Nan != NULL) ? connection->Nan : "[NULL_NAME]";
+                    printf(" -> %s", connectionName);
                     connection = connection->next;
                 }
                 printf("\n");

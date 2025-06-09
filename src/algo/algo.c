@@ -56,10 +56,10 @@ Path *find_path(Graph *graph, bool *used_nodes) {
         }
     }
 
-    // if (!endNode->visited) {
-    //     printf("Aucun chemin trouvé entre le départ et la fin.\n");
-    //     return NULL;
-    // }
+    // Check if we actually reached the end node
+    if (!endNode->visited) {
+        return NULL; // No path found
+    }
 
     return build_path(graph, end);
 }

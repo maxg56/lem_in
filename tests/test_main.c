@@ -25,7 +25,7 @@ void print_welcome_message(void)
     printf("\n");
 }
 
-void print_usage(const char *program_name)
+void print_test_usage(const char *program_name)
 {
     printf("Usage: %s [test_category]\n\n", program_name);
     printf("Available test categories:\n");
@@ -36,6 +36,7 @@ void print_usage(const char *program_name)
     printf("  parsing    - Test input parsing functions\n");
     printf("  algorithms - Test pathfinding algorithms\n");
     printf("  integration- Test complete functionality\n");
+    printf("  input      - Test input file validation\n");
     printf("  all        - Run all tests (default)\n");
     printf("\nExamples:\n");
     printf("  %s graph      # Run only graph tests\n", program_name);
@@ -49,7 +50,7 @@ int main(int argc, char **argv)
     
     // Check if help is requested
     if (argc > 1 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)) {
-        print_usage(argv[0]);
+        print_test_usage(argv[0]);
         return 0;
     }
     
@@ -69,6 +70,8 @@ int main(int argc, char **argv)
             run_algorithm_tests();
         } else if (strcmp(argv[1], "integration") == 0) {
             run_integration_tests();
+        } else if (strcmp(argv[1], "input") == 0) {
+            run_input_file_tests();
         } else if (strcmp(argv[1], "all") == 0) {
             run_graph_tests();
             run_edge_management_tests();
@@ -77,9 +80,10 @@ int main(int argc, char **argv)
             run_parsing_tests();
             run_algorithm_tests();
             run_integration_tests();
+            run_input_file_tests();
         } else {
             printf("❌ Unknown test category: %s\n\n", argv[1]);
-            print_usage(argv[0]);
+            print_test_usage(argv[0]);
             return 1;
         }
     } else {
@@ -91,6 +95,7 @@ int main(int argc, char **argv)
         run_parsing_tests();
         run_algorithm_tests();
         run_integration_tests();
+        run_input_file_tests();
     }
     
     // Clean up and show final results
