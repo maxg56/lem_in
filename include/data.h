@@ -77,7 +77,6 @@ void displayGraph(Graph* graph);
 void addNode(Graph* graph, char * Nan, int x , int y, bool isStart, bool isEnd);
 void resetNodePosition(void);
 void print_map(void);
-void simulate_ants(Graph *graph, Path **paths, int path_count, int ant_count);
 
 // Gestion des connexions/arêtes
 void addEdge(Graph* graph, int nodeA, int nodeB);
@@ -125,7 +124,16 @@ bool resizeGraph(Graph* graph, int newSize);
 //Algorithmes
 Path *find_path(Graph *graph, bool *used_nodes);
 Path **findAllPaths(Graph* graph, int *count);
+void findAllPathsRecursive(Graph *graph, int current, int target, bool *visited, 
+                          int *current_path, int path_length, Path ***paths, 
+                          int *pathCount, int max_capacity);
 Path *build_path(Graph *graph, int end_index);
+
+// Fonctions d'optimisation
+void sortPathsByLength(Path **paths, int count);
+int calculateTurns(Path **paths, int path_count, int total_ants);
+bool arePathsDisjoint(Path *path1, Path *path2);
+Path **selectOptimalPaths(Path **all_paths, int total_count, int total_ants, int *selected_count);
 
 //Mouvements des fourmis
 void antsMovements(Graph *graph, Path *path);

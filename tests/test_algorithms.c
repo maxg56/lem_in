@@ -26,7 +26,8 @@ void test_find_path_basic(void)
         addEdge(graph, 0, 1);
         addEdge(graph, 1, 2);
 
-        Path* path = find_path(graph);
+        bool used_nodes[3] = {false, false, false};
+        Path* path = find_path(graph, used_nodes);
         print_test_result("Path found", path != NULL);
 
         if (path) {
@@ -66,7 +67,8 @@ void test_find_multiple_paths(void)
         addEdge(graph, 2, 3);
         addEdge(graph, 3, 4);
 
-        Path* path = find_path(graph);
+        bool used_nodes[5] = {false, false, false, false, false};
+        Path* path = find_path(graph, used_nodes);
         print_test_result("Path found in complex graph", path != NULL);
 
         if (path) {
@@ -101,7 +103,8 @@ void test_no_path_exists(void)
 
         addEdge(graph, 1, 2);
 
-        Path* path = find_path(graph);
+        bool used_nodes[4] = {false, false, false, false};
+        Path* path = find_path(graph, used_nodes);
         print_test_result("No path found correctly", path == NULL);
 
         printf("Correctly detected no path in disconnected graph\n");
@@ -114,7 +117,8 @@ void test_no_path_exists(void)
     if (single_graph) {
         addNode(single_graph, "start_end", 0, 0, true, true);
 
-        Path* path = find_path(single_graph);
+        bool used_nodes_single[1] = {false};
+        Path* path = find_path(single_graph, used_nodes_single);
         print_test_result("Single node path found", path != NULL);
         if (path) {
             print_test_result("Single node path length is 1", path->len == 1);

@@ -36,6 +36,7 @@ void run_integration_tests(void);
 void run_edge_management_tests(void);
 void run_search_navigation_tests(void);
 void run_validation_tests(void);
+void run_input_file_tests(void);
 
 // Graph tests
 void test_createGraph_basic(void);

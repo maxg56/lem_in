@@ -18,8 +18,8 @@ void test_parse_rooms(void)
 {
     print_test_header("Parsing - Room parsing");
     
-    // Create test map with rooms
-    const char *test_map = "3\n##start\nstart 0 0\nroom1 5 5\nroom2 10 10\n##end\nend 15 15\n";
+    // Create test map with rooms and minimal connections for valid lem-in file
+    const char *test_map = "3\n##start\nstart 0 0\nroom1 5 5\nroom2 10 10\n##end\nend 15 15\nstart-room1\nroom1-room2\nroom2-end\n";
     
     print_test_result("Test map created", create_test_map_file("test_rooms.txt", test_map));
     
