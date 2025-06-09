@@ -1,8 +1,7 @@
-
 #!/bin/bash
 
 # Génère le fichier d'entrée
-./generator_linux --flow-thousand > ts
+./generator_linux --big-superposition > ts
 
 # Récupère la ligne attendue (prendre seulement la première occurrence)
 EXPECTED=$(grep "#Here is the number of lines required:" ts | head -1 | cut -d':' -f2 | tr -d ' \n')
@@ -15,8 +14,9 @@ echo "Expected: $EXPECTED"
 echo "Actual: $ACTUAL"
 
 # Teste si c’est correct
-if [ "$ACTUAL" -eq "$EXPECTED" ]; then
+if [ "$ACTUAL" -le "$EXPECTED" ]; then
 	echo "✅ Test passed"
 else
 	echo "❌ Test failed"
 fi
+

@@ -49,17 +49,18 @@ test_and_calculate() {
     
     # Calculate performance score
     local score
-    if [ "$actual" -le "$expected" ]; then
-        # Better than expected = 100% + bonus
+    if [ "$actual" -lt "$expected" ]; then
+        # Better than expected = 100% + improvement percentage
         local improvement=$((expected - actual))
-        score=$((100 + improvement * 100 / expected))
+        local improvement_percent=$((improvement * 100 / expected))
+        score=$((100 + improvement_percent))
         if [ $score -gt 200 ]; then score=200; fi  # Cap at 200%
         echo -e "${GREEN}  ✅ EXCELLENT: ${actual}/${expected} lines (${score}% performance)${NC}"
     elif [ "$actual" -eq "$expected" ]; then
         score=100
         echo -e "${GREEN}  ✅ PERFECT: ${actual}/${expected} lines (100% performance)${NC}"
     else
-        # Worse than expected = percentage of expected
+        # Worse than expected = percentage efficiency (expected/actual * 100)
         score=$((expected * 100 / actual))
         echo -e "${YELLOW}  ⚠️  SUBOPTIMAL: ${actual}/${expected} lines (${score}% performance)${NC}"
     fi
@@ -81,9 +82,9 @@ for i in "${!TEST_NAMES[@]}"; do
     case "${TEST_NAMES[$i]}" in
         "flow-one") test_and_calculate "--flow-one" "1 ant with distinctive path" 5 ;;
         "flow-ten") test_and_calculate "--flow-ten" "~10 ants with distinctive path" 5 ;;
-        "flow-thousand") test_and_calculate "--flow-thousand" "~100 ants with distinctive path" 10 ;;
-        "big") test_and_calculate "--big" "~4000 rooms for time complexity" 15 ;;
-        "big-superposition") test_and_calculate "--big-superposition" "big map with overlapping paths" 15 ;;
+        "flow-thousand") test_and_calculate "--flow-thousand" "~100 ants with distinctive path" 5 ;;
+        "big") test_and_calculate "--big" "~4000 rooms for time complexity" 5 ;;
+        "big-superposition") test_and_calculate "--big-superposition" "big map with overlapping paths" 10 ;;
     esac
     
     if [ $? -eq 0 ]; then

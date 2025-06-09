@@ -96,7 +96,12 @@ int main(int argc, char *argv[]) {
     verbose_printf("Attribution des fourmis aux chemins...\n");
     assignAnts(paths, path_count, graph->nb_fourmis);
     display_paths_if_needed(graph, paths, path_count);
-    execute_ant_simulation(graph, paths, path_count);
+    
+    // Skip simulation if only showing used paths
+    if (!show_used_paths()) {
+        execute_ant_simulation(graph, paths, path_count);
+    }
+    
     display_final_statistics(graph, path_count, start_time);
     ft_arna_free();
     return EXIT_SUCCESS;

@@ -149,8 +149,6 @@ void	multiplePaths(Graph *graph, Path **paths, int pathCount)
 				} else {
 					activeAnts = next;
 				}
-				
-				// La mémoire sera libérée automatiquement par ft_arna_free()
 				current = next;
 				continue;
 			}
@@ -185,8 +183,10 @@ void	multiplePaths(Graph *graph, Path **paths, int pathCount)
 			break;
 		}
 		
-		// Sécurité pour éviter les boucles infinies
-		if (turn > totalAnts + pathCount + 10) {
+		// Sécurité pour éviter les boucles infinies - augmenter significativement la limite
+		// Pour tenir compte des chemins longs (ex: 29 salles + temps pour toutes les fourmis)
+		int maxTurns = totalAnts + (pathCount > 0 ? paths[0]->len * 2 : 50) + 20;
+		if (turn > maxTurns) {
 			break;
 		}
 	}
