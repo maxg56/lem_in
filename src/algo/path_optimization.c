@@ -18,35 +18,44 @@ int calculateTurns(Path **paths, int path_count, int total_ants)
 {
     if (path_count == 0) return INT_MAX;
     
-    // Calculer les tours avec assignation optimale
-    int min_turns = INT_MAX;
+    if (path_count == 1) {
+        return paths[0]->len + total_ants - 1;
+    }
     
-    // Essayer différentes combinaisons d'assignation
-    for (int main_path = 0; main_path < path_count; main_path++) {
-        int turns = paths[main_path]->len + total_ants - 1;
+    // Simuler l'assignation optimale (même logique que assignAnts)
+    int assignment[path_count];
+    for (int i = 0; i < path_count; i++) {
+        assignment[i] = 0;
+    }
+    
+    // Assigner une fourmi à la fois au chemin qui minimise le temps de fin
+    for (int ant = 0; ant < total_ants; ant++) {
+        int best_path = 0;
+        int min_finish_time = INT_MAX;
         
-        // Pour chemins multiples, calculer l'optimisation
-        if (path_count > 1) {
-            int remaining_ants = total_ants;
-            int max_finish_time = 0;
-            
-            for (int i = 0; i < path_count && remaining_ants > 0; i++) {
-                int ants_on_path = (remaining_ants + path_count - i - 1) / (path_count - i);
-                int finish_time = paths[i]->len + ants_on_path - 1;
-                if (finish_time > max_finish_time) {
-                    max_finish_time = finish_time;
-                }
-                remaining_ants -= ants_on_path;
+        for (int i = 0; i < path_count; i++) {
+            int finish_time = paths[i]->len + assignment[i];
+            if (finish_time < min_finish_time) {
+                min_finish_time = finish_time;
+                best_path = i;
             }
-            turns = max_finish_time;
         }
         
-        if (turns < min_turns) {
-            min_turns = turns;
+        assignment[best_path]++;
+    }
+    
+    // Calculer le temps de fin maximum
+    int max_finish_time = 0;
+    for (int i = 0; i < path_count; i++) {
+        if (assignment[i] > 0) {
+            int finish_time = paths[i]->len + assignment[i] - 1;
+            if (finish_time > max_finish_time) {
+                max_finish_time = finish_time;
+            }
         }
     }
     
-    return min_turns;
+    return max_finish_time;
 }
 
 // Vérifie si deux chemins sont disjoints (ne partagent aucun nœud intermédiaire)
@@ -75,16 +84,44 @@ Path **selectOptimalPaths(Path **all_paths, int total_count, int total_ants, int
     int best_count = 0;
     int min_turns = INT_MAX;
     
-    // Limiter les combinaisons pour éviter l'explosion combinatoire
-    int max_combinations = (total_count > 10) ? 1024 : (1 << total_count);
+    // 1. Essayer le plus court chemin seul
+    if (total_count > 0) {
+        int single_path_turns = all_paths[0]->len + total_ants - 1;
+        min_turns = single_path_turns;
+        best_combination[0] = all_paths[0];
+        best_count = 1;
+    }
     
-    // Essayer différentes combinaisons de chemins disjoints
+    // 2. Essayer différentes combinaisons de chemins (disjoints et non-disjoints)
+    int max_paths_to_test = (total_count > 8) ? 8 : total_count;
+    
+    for (int num_paths = 2; num_paths <= max_paths_to_test; num_paths++) {
+        // Tester la combinaison des N premiers chemins (triés par longueur)
+        Path **current_paths = ft_arnalloc(sizeof(Path*) * num_paths);
+        for (int i = 0; i < num_paths; i++) {
+            current_paths[i] = all_paths[i];
+        }
+        
+        // Calculer le nombre de tours pour cette combinaison
+        int turns = calculateTurnsForMultiplePaths(current_paths, num_paths, total_ants);
+        
+        if (turns < min_turns) {
+            min_turns = turns;
+            best_count = num_paths;
+            for (int i = 0; i < num_paths; i++) {
+                best_combination[i] = current_paths[i];
+            }
+        }
+    }
+    
+    // 3. Essayer les combinaisons de chemins complètement disjoints (plus optimal)
+    int max_combinations = (total_count > 10) ? 1024 : (1 << total_count);
     for (int mask = 1; mask < max_combinations; mask++) {
         Path **current_paths = ft_arnalloc(sizeof(Path*) * total_count);
         int current_count = 0;
         
         // Construire la combinaison actuelle
-        for (int i = 0; i < total_count && i < 20; i++) { // Limiter à 20 chemins max
+        for (int i = 0; i < total_count && i < 12; i++) { // Limiter à 12 chemins max
             if (mask & (1 << i)) {
                 current_paths[current_count++] = all_paths[i];
             }
@@ -110,12 +147,6 @@ Path **selectOptimalPaths(Path **all_paths, int total_count, int total_ants, int
                 }
             }
         }
-    }
-    
-    // Si aucune combinaison trouvée, prendre le plus court chemin
-    if (best_count == 0) {
-        best_combination[0] = all_paths[0];
-        best_count = 1;
     }
     
     *selected_count = best_count;
@@ -174,4 +205,46 @@ Path **findAllPaths(Graph *graph, int *count)
     Path **optimizedPaths = selectOptimalPaths(paths, pathCount, graph->nb_fourmis, count);
     
     return optimizedPaths;
+}
+
+// Calcule le nombre de tours pour des chemins multiples (même non-disjoints)
+int calculateTurnsForMultiplePaths(Path **paths, int path_count, int total_ants)
+{
+    if (path_count == 0) return INT_MAX;
+    if (path_count == 1) return paths[0]->len + total_ants - 1;
+    
+    // Utiliser la même logique que calculateTurns et assignAnts
+    int assignment[path_count];
+    for (int i = 0; i < path_count; i++) {
+        assignment[i] = 0;
+    }
+    
+    // Assigner une fourmi à la fois au chemin qui minimise le temps de fin
+    for (int ant = 0; ant < total_ants; ant++) {
+        int best_path = 0;
+        int min_finish_time = INT_MAX;
+        
+        for (int i = 0; i < path_count; i++) {
+            int finish_time = paths[i]->len + assignment[i];
+            if (finish_time < min_finish_time) {
+                min_finish_time = finish_time;
+                best_path = i;
+            }
+        }
+        
+        assignment[best_path]++;
+    }
+    
+    // Calculer le temps de fin maximum
+    int max_finish_time = 0;
+    for (int i = 0; i < path_count; i++) {
+        if (assignment[i] > 0) {
+            int finish_time = paths[i]->len + assignment[i] - 1;
+            if (finish_time > max_finish_time) {
+                max_finish_time = finish_time;
+            }
+        }
+    }
+    
+    return max_finish_time;
 }

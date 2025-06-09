@@ -131,6 +131,7 @@ void findPathsBFSSimple(Graph *graph, int start, int end, Path ***paths, int *pa
 Path **findAllPaths(Graph* graph, int *count);
 void sortPathsByLength(Path **paths, int count);
 int calculateTurns(Path **paths, int path_count, int total_ants);
+int calculateTurnsForMultiplePaths(Path **paths, int path_count, int total_ants);
 bool arePathsDisjoint(Path *path1, Path *path2);
 Path **selectOptimalPaths(Path **all_paths, int total_count, int total_ants, int *selected_count);
 

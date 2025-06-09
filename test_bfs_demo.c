@@ -25,20 +25,32 @@ void print_path(Path *path, Graph *graph) {
 void demo_bfs_vs_find_path() {
     printf("🔍 DÉMONSTRATION BFS vs FIND_PATH\n");
     printf("==================================\n\n");
+    printf("DEBUG: Starting demo...\n");
+    fflush(stdout);
     
     // Créer un graphe de test
+    printf("DEBUG: Creating graph...\n");
+    fflush(stdout);
     Graph *graph = createGraph(10);
     graph->nb_fourmis = 5;
+    printf("DEBUG: Graph created\n");
+    fflush(stdout);
     
     // Ajouter des nœuds
+    printf("DEBUG: Adding nodes...\n");
+    fflush(stdout);
     addNode(graph, "start", 0, 0, true, false);
     addNode(graph, "room1", 1, 0, false, false);
     addNode(graph, "room2", 2, 0, false, false);
     addNode(graph, "room3", 1, 1, false, false);
     addNode(graph, "room4", 2, 1, false, false);
     addNode(graph, "end", 3, 0, false, true);
+    printf("DEBUG: Nodes added\n");
+    fflush(stdout);
     
     // Ajouter des connexions pour créer plusieurs chemins
+    printf("DEBUG: Adding edges...\n");
+    fflush(stdout);
     addEdgeByName(graph, "start", "room1");
     addEdgeByName(graph, "start", "room3");
     addEdgeByName(graph, "room1", "room2");
@@ -46,6 +58,8 @@ void demo_bfs_vs_find_path() {
     addEdgeByName(graph, "room2", "end");
     addEdgeByName(graph, "room4", "end");
     addEdgeByName(graph, "room1", "room3"); // Connexion additionnelle
+    printf("DEBUG: Edges added\n");
+    fflush(stdout);
     
     printf("Graphe créé avec 6 nœuds et plusieurs chemins possibles\n\n");
     
@@ -91,11 +105,14 @@ void demo_bfs_vs_find_path() {
     
     // Test findAllPaths (qui utilise maintenant BFS)
     printf("3️⃣ FIND_ALL_PATHS - Tous les chemins (BFS):\n");
+    printf("   Début de la recherche de tous les chemins...\n");
+    fflush(stdout);
     int path_count = 0;
     start_time = clock();
     Path **all_paths = findAllPaths(graph, &path_count);
     end_time = clock();
     double all_paths_time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC * 1000;
+    printf("   Recherche terminée.\n");
     
     printf("   Nombre de chemins trouvés: %d\n", path_count);
     for (int i = 0; i < path_count; i++) {
