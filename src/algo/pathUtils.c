@@ -79,7 +79,19 @@ void	multiplePaths(Graph *graph, Path **paths, int pathCount)
 	int totalAnts = graph->nb_fourmis;
 	int antsArrived = 0;
 	t_list *activeAnts = NULL;
-	
+
+	for (int i = 0; i < pathCount; i++) {
+		if (paths[i]->len == 0) {
+			ft_printf("Chemin %d vide, pas de fourmis assignées.\n", i + 1);
+			continue;
+		}
+		ft_printf("Chemin %d: ", i + 1);
+		for (int j = 0; j < paths[i]->len; j++) {
+			Node *node = getNodeByIndex(graph, paths[i]->nodes[j]);
+			ft_printf("%s%s", node->Nan, (j < paths[i]->len - 1) ? " -> " : "");
+		}
+		ft_printf("\n");
+	}
 	// Assigner les fourmis de manière optimale
 	assignAnts(paths, pathCount, totalAnts);
 	

@@ -162,4 +162,14 @@ fcleanall: fcleanlibs
 	@$(RM) -rf $(TMP)
 	@printf "$(RED)All files removed!$(DEF_COLOR)\n"
 
-.PHONY: all clean fclean re norminette  cleanlibs fcleanlibs relibft fcleanall
+# Démonstration BFS
+demo_bfs: $(OBJDIR)
+	@echo "Compiling BFS demonstration..."
+	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) test_bfs_demo.c $(filter-out $(OBJDIR)/main.o, $(OBJ)) $(LIBFT) -o demo_bfs
+	@echo "Demo BFS compiled! Run with: ./demo_bfs"
+
+test_bfs: demo_bfs
+	@echo "🚀 Running BFS demonstration..."
+	./demo_bfs
+
+.PHONY: all clean fclean re norminette  cleanlibs fcleanlibs relibft fcleanall demo_bfs test_bfs

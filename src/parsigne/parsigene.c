@@ -44,6 +44,11 @@ Graph* parsigense(int fd) {
         
         // Gestion des commandes ##start et ##end
         if (ft_strncmp(trimmed_line, "##start", 7) == 0) {
+            // Vérifier si on attendait une salle après ##end
+            if (expecting_end_room) {
+                set_parsing_error(ERROR_COMMAND_NOT_FOLLOWED, "##start ou ##end non suivis d'une vraie salle");
+                return NULL;
+            }
             if (hasStart) {
                 set_parsing_error(ERROR_MULTIPLE_COMMANDS, "Plusieurs ##start trouvés");
                 return NULL;
@@ -55,6 +60,11 @@ Graph* parsigense(int fd) {
         }
         
         if (ft_strncmp(trimmed_line, "##end", 5) == 0) {
+            // Vérifier si on attendait une salle après ##start
+            if (expecting_start_room) {
+                set_parsing_error(ERROR_COMMAND_NOT_FOLLOWED, "##start ou ##end non suivis d'une vraie salle");
+                return NULL;
+            }
             if (hasEnd) {
                 set_parsing_error(ERROR_MULTIPLE_COMMANDS, "Plusieurs ##end trouvés");
                 return NULL;
