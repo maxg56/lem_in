@@ -217,7 +217,6 @@
             <div class="panel-section">
                 <h3>🔍 Pathfinding</h3>
                 <button class="button" onclick="findPath('bfs')">Find Path (BFS)</button>
-                <button class="button" onclick="findPath('dfs')">Find Path (DFS)</button>
                 <button class="button" onclick="findPath('all_paths')">Find All Paths</button>
                 <button class="button" onclick="findPath('disjoint')">Find Disjoint Paths</button>
                 
@@ -396,19 +395,24 @@
                 const response = await fetch('/api/maps');
                 const data = await response.json();
                 
-                if (data.success) {
+                if (data.success && data.data && data.data.maps) {
                     const select = document.getElementById('map-select');
                     select.innerHTML = '<option value="">Select a map...</option>';
                     
-                    data.maps.forEach(map => {
+                    data.data.maps.forEach(map => {
                         const option = document.createElement('option');
                         option.value = map;
                         option.textContent = map;
                         select.appendChild(option);
                     });
+                    
+                    showStatus(`Loaded ${data.data.maps.length} maps`, 'success');
+                } else {
+                    showStatus('No maps found or invalid response', 'error');
                 }
             } catch (error) {
-                showStatus('Failed to load maps', 'error');
+                console.error('Error loading maps:', error);
+                showStatus('Failed to load maps: ' + error.message, 'error');
             }
         }
 
