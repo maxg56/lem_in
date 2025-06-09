@@ -133,6 +133,7 @@ void sortPathsByLength(Path **paths, int count);
 int calculateTurns(Path **paths, int path_count, int total_ants);
 int calculateTurnsForMultiplePaths(Path **paths, int path_count, int total_ants);
 bool arePathsDisjoint(Path *path1, Path *path2);
+bool findBestDisjointSet(Path **all_paths, int total_count, int target_size, Path **result_set);
 Path **selectOptimalPaths(Path **all_paths, int total_count, int total_ants, int *selected_count);
 
 // DFS Legacy (for compatibility)
