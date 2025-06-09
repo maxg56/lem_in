@@ -1,8 +1,32 @@
-.tmp/
+# Compiled files
 *.o
-lem_in
+*.a
+lem-in
 lem_in_tests
+
+# Temporary files
+.tmp/
 .compiled_count
+*.tmp
+*~
+*.swp
+*.swo
+
+# Debug files
 vgcore.*
-.compiled_count
-__pycache__
+core.*
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Editor files
+.vscode/settings.json
+.DS_Store
+
+# Test outputs
+tests/test_output/
+
+# Debug and utility folders
+debug_files/

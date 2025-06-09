@@ -9,6 +9,10 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+# Get script directory and project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
 echo -e "${BLUE}🚀 LEM-IN PERFORMANCE EVALUATION${NC}"
 echo -e "${BLUE}=================================${NC}"
 echo ""
@@ -20,8 +24,11 @@ test_single_case() {
     
     echo -e "${YELLOW}Testing ${option}${NC} (${description})"
     
+    # Change to project root directory
+    cd "$PROJECT_ROOT" || return 1
+    
     # Generate map
-    if ! timeout ${timeout_val} ./generator_linux ${option} > "temp_${option}.map" 2>/dev/null; then
+    if ! timeout ${timeout_val} ./scripts/generator_linux ${option} > "temp_${option}.map" 2>/dev/null; then
         echo -e "${RED}  ❌ Generator timeout/failed${NC}"
         return 1
     fi

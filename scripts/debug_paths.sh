@@ -1,7 +1,14 @@
 #!/bin/bash
 
+# Get script directory and project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# Change to project root
+cd "$PROJECT_ROOT" || exit 1
+
 # Génère le fichier d'entrée
-./generator_linux --big-superposition > ts
+./scripts/generator_linux --big-superposition > ts
 
 # Récupère la ligne attendue (prendre seulement la première occurrence)
 EXPECTED=$(grep "#Here is the number of lines required:" ts | head -1 | cut -d':' -f2 | tr -d ' \n')

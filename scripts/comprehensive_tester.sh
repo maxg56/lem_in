@@ -14,6 +14,10 @@ NC='\033[0m' # No Color
 TIMEOUT_SECONDS=30
 ITERATIONS_PER_TEST=5
 
+# Get script directory and project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
 # Generator options to test
 GENERATOR_OPTIONS=(
     "--flow-one"
@@ -41,8 +45,11 @@ run_test() {
     
     echo -e "${YELLOW}Testing ${option} (iteration ${iteration}/${ITERATIONS_PER_TEST})...${NC}"
     
+    # Change to project root directory
+    cd "$PROJECT_ROOT" || return 1
+    
     # Generate map
-    timeout ${TIMEOUT_SECONDS} ./generator_linux ${option} > "${temp_map}" 2>/dev/null
+    timeout ${TIMEOUT_SECONDS} ./scripts/generator_linux ${option} > "${temp_map}" 2>/dev/null
     if [ $? -ne 0 ]; then
         echo -e "${RED}  ✗ Generator failed or timed out${NC}"
         rm -f "${temp_map}"
@@ -115,8 +122,8 @@ run_test() {
 for option in "${GENERATOR_OPTIONS[@]}"; do
     echo -e "\n${BLUE}Testing ${option}:${NC}"
     
-    local option_passed=0
-    local option_total=0
+    option_passed=0
+    option_total=0
     
     for i in $(seq 1 $ITERATIONS_PER_TEST); do
         ((TOTAL_TESTS++))
@@ -131,7 +138,7 @@ for option in "${GENERATOR_OPTIONS[@]}"; do
     done
     
     # Calculate percentage for this option
-    local percentage=0
+    percentage=0
     if [ $option_total -gt 0 ]; then
         percentage=$((option_passed * 100 / option_total))
     fi
@@ -145,7 +152,7 @@ echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  FINAL RESULTS${NC}"
 echo -e "${BLUE}========================================${NC}"
 
-local success_percentage=0
+success_percentage=0
 if [ $TOTAL_TESTS -gt 0 ]; then
     success_percentage=$((PASSED_TESTS * 100 / TOTAL_TESTS))
 fi
