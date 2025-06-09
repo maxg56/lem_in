@@ -77,11 +77,6 @@ Graph* parsigense(int fd) {
         
         // Ignorer les autres commentaires
         if (trimmed_line[0] == '#') {
-            // Vérifier si on attendait une salle après ##start ou ##end
-            if (expecting_start_room || expecting_end_room) {
-                set_parsing_error(ERROR_COMMAND_NOT_FOLLOWED, "##start ou ##end non suivis d'une vraie salle");
-                return NULL;
-            }
             continue;
         }
         
@@ -155,14 +150,18 @@ Graph* parsigense(int fd) {
         }
         
         // Ligne de salle : nom x y
-        bool room_parsed = parseRoom(graph, trimmed_line, isStart, isEnd);
+        // Si on attendait une salle start/end, utiliser ce flag même si isStart/isEnd est false
+        bool should_be_start = isStart || expecting_start_room;
+        bool should_be_end = isEnd || expecting_end_room;
+        
+        bool room_parsed = parseRoom(graph, trimmed_line, should_be_start, should_be_end);
         
         if (room_parsed) {
             // Reset des flags après traitement réussi d'une salle
-            if (isStart) {
+            if (should_be_start) {
                 expecting_start_room = false;
             }
-            if (isEnd) {
+            if (should_be_end) {
                 expecting_end_room = false;
             }
             isStart = false;

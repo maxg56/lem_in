@@ -80,18 +80,6 @@ void	multiplePaths(Graph *graph, Path **paths, int pathCount)
 	int antsArrived = 0;
 	t_list *activeAnts = NULL;
 
-	for (int i = 0; i < pathCount; i++) {
-		if (paths[i]->len == 0) {
-			ft_printf("Chemin %d vide, pas de fourmis assignées.\n", i + 1);
-			continue;
-		}
-		ft_printf("Chemin %d: ", i + 1);
-		for (int j = 0; j < paths[i]->len; j++) {
-			Node *node = getNodeByIndex(graph, paths[i]->nodes[j]);
-			ft_printf("%s%s", node->Nan, (j < paths[i]->len - 1) ? " -> " : "");
-		}
-		ft_printf("\n");
-	}
 	// Assigner les fourmis de manière optimale
 	assignAnts(paths, pathCount, totalAnts);
 	
@@ -117,11 +105,12 @@ void	multiplePaths(Graph *graph, Path **paths, int pathCount)
 		
 		// Première passe : déplacer les fourmis existantes
 		t_list *current = activeAnts;
-		t_list *toRemove = NULL;
+		t_list *prev = NULL;
 		
 		while (current)
 		{
 			Ants *ant = current->content;
+			t_list *next = current->next;
 			
 			// Vérifier si la fourmi peut avancer
 			if (ant->position + 1 < paths[ant->path_index]->len) {
@@ -129,76 +118,61 @@ void	multiplePaths(Graph *graph, Path **paths, int pathCount)
 				Node *nextNode = getNodeByIndex(graph, nextNodeIndex);
 				
 				// Vérifier si la position suivante est libre (l'end node peut toujours accepter des fourmis)
-				if (!nodeOccupied[nextNodeIndex] || nextNode->isEnd) {
+				// Le nœud de départ (start) ne doit pas être bloqué car les fourmis en sortent
+				if (!nodeOccupied[nextNodeIndex] || nextNode->isEnd || nextNode->isStart) {
 					ant->position++;
-					// Ne pas marquer l'end node comme occupé car les fourmis disparaissent
-					if (!nextNode->isEnd) {
+					// Ne pas marquer l'end node ou start node comme occupé
+					if (!nextNode->isEnd && !nextNode->isStart) {
 						nodeOccupied[nextNodeIndex] = true;
 					}
 					
-					Node *room = getNodeByIndex(graph, nextNodeIndex);
-					ft_printf("L%d-%s ", ant->id, room->Nan);
-					anyMovement = true;
+					// Afficher le mouvement seulement si la fourmi QUITTE le start node
+					// Les fourmis passent de position -1 à position 0 (start) sans affichage
+					// Puis affichent tous leurs mouvements suivants, y compris vers l'end node
+					if (ant->position > 0) {
+						Node *room = getNodeByIndex(graph, nextNodeIndex);
+						ft_printf("L%d-%s ", ant->id, room->Nan);
+						anyMovement = true;
+					}
+					
+					prev = current;
+				} else {
+					prev = current;
 				}
 			} else {
 				// La fourmi a atteint la fin
 				antsArrived++;
 				
-				// Marquer cette fourmi pour suppression
-				t_list *nodeToRemove = ft_lstnew(current);
-				ft_lstadd_back(&toRemove, nodeToRemove);
-			}
-			
-			current = current->next;
-		}
-		
-		// Supprimer les fourmis arrivées
-		while (toRemove) {
-			t_list *antNode = (t_list*)toRemove->content;
-			
-			// Trouver et supprimer le nœud de la liste des fourmis actives
-			t_list *prev = NULL;
-			t_list *searchCurrent = activeAnts;
-			
-			while (searchCurrent && searchCurrent != antNode) {
-				prev = searchCurrent;
-				searchCurrent = searchCurrent->next;
-			}
-			
-			if (searchCurrent) {
+				// Supprimer cette fourmi de la liste
 				if (prev) {
-					prev->next = searchCurrent->next;
+					prev->next = next;
 				} else {
-					activeAnts = searchCurrent->next;
+					activeAnts = next;
 				}
+				
+				// La mémoire sera libérée automatiquement par ft_arna_free()
+				current = next;
+				continue;
 			}
 			
-			t_list *toRemoveNext = toRemove->next;
-			toRemove = toRemoveNext;
+			current = next;
 		}
 		
 		// Deuxième passe : envoyer de nouvelles fourmis
 		for (int i = 0; i < pathCount && nextAntId <= totalAnts; i++)
 		{
 			if (antsSent[i] < paths[i]->assigned_ants) {
-				int startNodeIndex = paths[i]->nodes[0];
+				// Le nœud de départ ne peut jamais être bloqué car c'est le point d'origine
+				// Les fourmis commencent à position -1 et vont vers position 0 (start node)
+				Ants *newAnt = ft_arnalloc(sizeof(Ants));
+				newAnt->id = nextAntId++;
+				newAnt->path_index = i;
+				newAnt->position = -1; // Commencer AVANT le chemin
+				newAnt->arrived = false;
 				
-				// Vérifier si le premier nœud du chemin est libre
-				if (!nodeOccupied[startNodeIndex]) {
-					Ants *newAnt = ft_arnalloc(sizeof(Ants));
-					newAnt->id = nextAntId++;
-					newAnt->path_index = i;
-					newAnt->position = 0;
-					newAnt->arrived = false;
-					
-					ft_lstadd_back(&activeAnts, ft_lstnew(newAnt));
-					antsSent[i]++;
-					
-					nodeOccupied[startNodeIndex] = true;
-					Node *room = getNodeByIndex(graph, startNodeIndex);
-					ft_printf("L%d-%s ", newAnt->id, room->Nan);
-					anyMovement = true;
-				}
+				ft_lstadd_back(&activeAnts, ft_lstnew(newAnt));
+				antsSent[i]++;
+				// Don't set anyMovement here - ants starting at position -1 don't produce visible output
 			}
 		}
 		
@@ -206,13 +180,13 @@ void	multiplePaths(Graph *graph, Path **paths, int pathCount)
 			ft_putchar_fd('\n', 1);
 		}
 		
-		// Sécurité pour éviter les boucles infinies
-		if (turn > totalAnts + pathCount + 10) {
+		// Si toutes les fourmis sont arrivées, on peut arrêter immédiatement
+		if (antsArrived >= totalAnts) {
 			break;
 		}
 		
-		// Si toutes les fourmis sont arrivées et qu'il n'y a plus de fourmis actives, on peut arrêter
-		if (antsArrived >= totalAnts && activeAnts == NULL) {
+		// Sécurité pour éviter les boucles infinies
+		if (turn > totalAnts + pathCount + 10) {
 			break;
 		}
 	}
@@ -232,68 +206,76 @@ void assignAnts(Path **paths, int path_count, int total_ants)
         paths[i]->assigned_ants = 0;
     }
 
-    // Assignation optimale pour minimiser le nombre de tours
-    // Algorithme simple mais efficace : distribution équilibrée en tenant compte des longueurs
-    int min_turns = INT_MAX;
-    int best_assignment[path_count];
+    // Algorithme d'assignation optimale amélioré
+    // Pour de gros nombres de fourmis, utiliser une approche plus mathématique
     
-    // Initialiser avec une répartition simple
-    for (int i = 0; i < path_count; i++) {
-        best_assignment[i] = total_ants / path_count;
-    }
-    
-    // Distribuer le reste
-    int remainder = total_ants % path_count;
-    for (int i = 0; i < remainder; i++) {
-        best_assignment[i]++;
-    }
-    
-    // Essayer d'optimiser en redistribuant les fourmis
-    for (int attempt = 0; attempt < path_count; attempt++) {
-        int assignment[path_count];
-        for (int i = 0; i < path_count; i++) assignment[i] = 0;
+    if (total_ants >= 50) {
+        // Algorithme optimal pour gros nombres : équilibrer les temps de fin
+        int min_turns = INT_MAX;
+        int best_assignment[path_count];
         
-        int remaining_ants = total_ants;
-        
-        // Distribuer les fourmis de manière cyclique en commençant par les chemins courts
-        while (remaining_ants > 0) {
-            int best_path = 0;
+        // Essayer différentes distributions en commençant par les chemins courts
+        for (int start_path = 0; start_path < path_count; start_path++) {
+            int assignment[path_count];
+            for (int i = 0; i < path_count; i++) assignment[i] = 0;
             
-            // Trouver le chemin avec le meilleur ratio (temps de fin le plus petit)
-            for (int i = 1; i < path_count; i++) {
-                int current_finish_i = (assignment[i] > 0) ? paths[i]->len + assignment[i] - 1 : paths[i]->len;
-                int current_finish_best = (assignment[best_path] > 0) ? paths[best_path]->len + assignment[best_path] - 1 : paths[best_path]->len;
+            int remaining_ants = total_ants;
+            
+            // Distribuer les fourmis en minimisant le temps de fin maximum
+            while (remaining_ants > 0) {
+                int best_path = 0;
+                int min_finish_time = INT_MAX;
                 
-                if (current_finish_i < current_finish_best) {
+                for (int i = 0; i < path_count; i++) {
+                    int finish_time = paths[i]->len + assignment[i];
+                    if (finish_time < min_finish_time) {
+                        min_finish_time = finish_time;
+                        best_path = i;
+                    }
+                }
+                
+                assignment[best_path]++;
+                remaining_ants--;
+            }
+            
+            // Calculer le temps de fin maximum pour cette distribution
+            int max_finish_time = 0;
+            for (int i = 0; i < path_count; i++) {
+                if (assignment[i] > 0) {
+                    int finish_time = paths[i]->len + assignment[i] - 1;
+                    if (finish_time > max_finish_time) {
+                        max_finish_time = finish_time;
+                    }
+                }
+            }
+            
+            if (max_finish_time < min_turns) {
+                min_turns = max_finish_time;
+                for (int i = 0; i < path_count; i++) {
+                    best_assignment[i] = assignment[i];
+                }
+            }
+        }
+        
+        // Appliquer la meilleure assignation
+        for (int i = 0; i < path_count; i++) {
+            paths[i]->assigned_ants = best_assignment[i];
+        }
+    } else {
+        // Algorithme simple pour petits nombres
+        for (int ant = 0; ant < total_ants; ant++) {
+            int best_path = 0;
+            int min_finish_time = INT_MAX;
+            
+            for (int i = 0; i < path_count; i++) {
+                int finish_time = paths[i]->len + paths[i]->assigned_ants;
+                if (finish_time < min_finish_time) {
+                    min_finish_time = finish_time;
                     best_path = i;
                 }
             }
             
-            assignment[best_path]++;
-            remaining_ants--;
+            paths[best_path]->assigned_ants++;
         }
-        
-        // Calculer le nombre de tours pour cette répartition
-        int max_finish_time = 0;
-        for (int i = 0; i < path_count; i++) {
-            if (assignment[i] > 0) {
-                int finish_time = paths[i]->len + assignment[i] - 1;
-                if (finish_time > max_finish_time) {
-                    max_finish_time = finish_time;
-                }
-            }
-        }
-        
-        if (max_finish_time < min_turns) {
-            min_turns = max_finish_time;
-            for (int i = 0; i < path_count; i++) {
-                best_assignment[i] = assignment[i];
-            }
-        }
-    }
-    
-    // Appliquer la meilleure assignation
-    for (int i = 0; i < path_count; i++) {
-        paths[i]->assigned_ants = best_assignment[i];
     }
 }

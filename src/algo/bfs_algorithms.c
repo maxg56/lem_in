@@ -142,20 +142,71 @@ void findPathsBFSSimple(Graph *graph, int start, int end, Path ***paths, int *pa
         used_nodes[i] = false;
     }
     
+    // printf("DEBUG: Starting path search, max_capacity=%d\n", max_capacity);
+    fflush(stdout);
+    
     // Trouver des chemins jusqu'à ce qu'il n'y en ait plus
+    int iterations = 0;
     while (*pathCount < max_capacity && *pathCount < 50) { // Limite raisonnable
+        iterations++;
+        // printf("DEBUG: Iteration %d, pathCount=%d\n", iterations, *pathCount);
+        fflush(stdout);
+        
+        if (iterations > 100) { // Safety break to prevent infinite loops
+            // printf("DEBUG: Breaking due to too many iterations\n");
+            fflush(stdout);
+            break;
+        }
+        
         resetNodePositions(graph);
         Path *new_path = find_path(graph, used_nodes);
         
+        // printf("DEBUG: find_path returned %s\n", new_path ? "path" : "NULL");
+        fflush(stdout);
+        
         if (!new_path || new_path->len <= 0) {
+            // printf("DEBUG: No more paths found, breaking\n");
+            fflush(stdout);
             break; // Aucun chemin trouvé
+        }
+        
+        // Vérifier si on a déjà ce chemin (éviter les doublons)
+        bool is_duplicate = false;
+        for (int j = 0; j < *pathCount; j++) {
+            if ((*paths)[j]->len == new_path->len) {
+                bool same_path = true;
+                for (int k = 0; k < new_path->len; k++) {
+                    if ((*paths)[j]->nodes[k] != new_path->nodes[k]) {
+                        same_path = false;
+                        break;
+                    }
+                }
+                if (same_path) {
+                    is_duplicate = true;
+                    break;
+                }
+            }
+        }
+        
+        // printf("DEBUG: Path duplicate check: %s\n", is_duplicate ? "yes" : "no");
+        fflush(stdout);
+        
+        if (is_duplicate) {
+            // Libérer la mémoire du chemin dupliqué et sortir
+            if (new_path->nodes) free(new_path->nodes);
+            free(new_path);
+            // printf("DEBUG: Found duplicate path, breaking\n");
+            fflush(stdout);
+            break;
         }
         
         // Ajouter le chemin trouvé
         (*paths)[(*pathCount)++] = new_path;
+        // printf("DEBUG: Added path %d (length %d)\n", *pathCount, new_path->len);
+        fflush(stdout);
         
         // Marquer les nœuds intermédiaires comme utilisés (sauf start et end)
-        for (int i = 0; i < new_path->len - 1; i++) { // Exclure le dernier (end)
+        for (int i = 0; i < new_path->len; i++) { // Marquer tous les nœuds du chemin
             int node_index = new_path->nodes[i];
             Node *node = getNodeByIndex(graph, node_index);
             if (node && !node->isStart && !node->isEnd) {

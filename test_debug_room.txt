@@ -1,7 +1,0 @@
-3
-##start
-start 0 0
-room1 5 5
-room2 10 10
-##end
-end 15 15
