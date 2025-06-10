@@ -315,7 +315,12 @@ class LemInCWrapper:
                 continue
             
             # Skip lines that don't contain ant moves (paths, room definitions, etc.)
+            # Only process lines that contain moves (L{num}-{room})
             if not any(part.startswith('L') and '-' in part for part in line.split()):
+                continue
+            
+            # Skip the path display lines (those with ->)
+            if '->' in line:
                 continue
             
             # Parse each turn/line of moves

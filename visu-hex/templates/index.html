@@ -156,10 +156,17 @@
         .path-info {
             background: rgba(80, 120, 200, 0.2);
             border: 1px solid #5078c8;
+            border-left: 4px solid #5078c8;
             padding: 10px;
             border-radius: 5px;
             margin: 5px 0;
             font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .path-info:hover {
+            background: rgba(80, 120, 200, 0.3);
+            transform: translateX(2px);
         }
 
         .simulation-controls {
@@ -216,22 +223,18 @@
 
             <div class="panel-section">
                 <h3>🔍 Pathfinding</h3>
-                <button class="button" onclick="findPath('bfs')">Find Path (BFS)</button>
-                <button class="button" onclick="findPath('all_paths')">Find All Paths</button>
-                <button class="button" onclick="findPath('disjoint')">Find Disjoint Paths</button>
-                
+                <button class="button" onclick="findAndDisplayPaths()">🔎 Analyser les Chemins</button>
                 <div id="path-results"></div>
             </div>
 
             <div class="panel-section simulation-controls" id="simulation-panel">
                 <h3>🐜 Simulation</h3>
-                <button class="button" onclick="startSimulation()">Start Simulation</button>
-                <button class="button" onclick="pauseSimulation()">Pause/Resume</button>
-                <button class="button" onclick="resetSimulation()">Reset</button>
-                
+                <button class="button" onclick="runFullSimulation()">🚀 Exécuter la Simulation</button>
+                <button class="button" onclick="pauseSimulation()">⏸️ Pause/Reprendre</button>
+                <button class="button" onclick="resetSimulation()">🔄 Reset</button>
                 <div>
                     <label>Speed: <span id="speed-value">1x</span></label>
-                    <input type="range" id="speed-slider" min="0.1" max="5" step="0.1" value="1" onchange="updateSpeed()">
+                    <input type="range" id="speed-slider" min="0.1" max="3" step="0.1" value="1" onchange="updateSpeed()">
                 </div>
                 
                 <div class="progress-bar">
@@ -275,6 +278,7 @@
         let currentTurn = 0;
         let simulationSpeed = 1;
         let ants = [];
+        let simulationTimer = null; // Timer for simulation steps
         
         // View state
         let zoom = 1;
@@ -297,6 +301,25 @@
             ant: '#ff5722',
             selected: '#ffeb3b'
         };
+
+        // Path colors - each path gets a different color
+        const PATH_COLORS = [
+            '#ff6b6b', // Red
+            '#4ecdc4', // Teal
+            '#45b7d1', // Blue
+            '#96ceb4', // Green
+            '#ffeaa7', // Yellow
+            '#dda0dd', // Plum
+            '#98d8c8', // Mint
+            '#f7dc6f', // Light Yellow
+            '#bb8fce', // Purple
+            '#85c1e9', // Sky Blue
+            '#f8c471', // Orange
+            '#82e0aa', // Light Green
+            '#f1948a', // Light Red
+            '#85c1e9', // Light Blue
+            '#d7bde2'  // Light Purple
+        ];
 
         // Initialize
         window.onload = function() {
@@ -512,6 +535,146 @@
             drawVisualization(); // Add this line to render after reset
         }
 
+        async function findAndDisplayPaths() {
+            if (!mapData) {
+                showStatus('Please load a map first', 'error');
+                return;
+            }
+
+            showLoading(true);
+            showStatus('Analyzing paths with C executable...', 'info');
+            
+            try {
+                const response = await fetch('/api/find_path', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ algorithm: 'optimal' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentPaths = data.paths || data.data?.paths || [];
+                    displayColoredPathResults(currentPaths);
+                    drawVisualization();
+                    
+                    if (currentPaths.length > 0) {
+                        document.getElementById('simulation-panel').classList.add('active');
+                        showStatus(`Found ${currentPaths.length} optimized path(s)`, 'success');
+                    } else {
+                        showStatus('No paths found', 'info');
+                    }
+                } else {
+                    showStatus('Pathfinding failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showStatus('Network error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function runFullSimulation() {
+            if (!mapData) {
+                showStatus('Please load a map first', 'error');
+                return;
+            }
+
+            showLoading(true);
+            showStatus('Running full simulation with C executable...', 'info');
+            
+            try {
+                // First get paths if we don't have them
+                if (currentPaths.length === 0) {
+                    await findAndDisplayPaths();
+                }
+
+                // Then run the full simulation
+                const response = await fetch('/api/simulate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ paths: currentPaths })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    simulationData = data.simulation || data.data?.simulation;
+                    initializeAntsWithColors();
+                    
+                    // Reset simulation state
+                    isSimulating = true;
+                    isPaused = false;
+                    currentTurn = 0;
+                    
+                    if (simulationTimer) {
+                        clearTimeout(simulationTimer);
+                    }
+                    
+                    updateSimulationStats();
+                    showStatus('Full simulation started - watch the ant animations!', 'success');
+                    
+                    // Start the simulation
+                    updateSimulation();
+                } else {
+                    showStatus('Simulation failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showStatus('Network error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayColoredPathResults(paths) {
+            const container = document.getElementById('path-results');
+            container.innerHTML = '';
+            
+            paths.forEach((path, index) => {
+                const pathColor = PATH_COLORS[index % PATH_COLORS.length];
+                const pathDiv = document.createElement('div');
+                pathDiv.className = 'path-info';
+                pathDiv.style.borderLeft = `4px solid ${pathColor}`;
+                pathDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                        <div style="width: 16px; height: 16px; background: ${pathColor}; border-radius: 50%; margin-right: 8px;"></div>
+                        <strong>Path ${index + 1}:</strong> ${path.length} rooms
+                    </div>
+                    <small>${path.join(' → ')}</small>
+                `;
+                container.appendChild(pathDiv);
+            });
+        }
+
+        function initializeAntsWithColors() {
+            ants = [];
+            const startRoom = mapData.rooms.find(r => r.is_start);
+            
+            if (startRoom) {
+                // Initialize all ants with their IDs, starting at the start room
+                for (let i = 0; i < mapData.ant_count; i++) {
+                    const pathIndex = currentPaths.length > 0 ? i % currentPaths.length : 0;
+                    ants.push({
+                        id: i + 1,
+                        pathColor: currentPaths.length > 0 ? PATH_COLORS[pathIndex % PATH_COLORS.length] : COLORS.ant,
+                        currentRoom: startRoom.name,
+                        x: startRoom.screenX,
+                        y: startRoom.screenY,
+                        targetX: startRoom.screenX,
+                        targetY: startRoom.screenY,
+                        animationProgress: 1, // Start with complete animation
+                        finished: false
+                    });
+                }
+            }
+            
+            document.getElementById('total-ants').textContent = ants.length;
+        }
+
         async function findPath(algorithm) {
             if (!mapData) {
                 showStatus('Please load a map first', 'error');
@@ -532,9 +695,9 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    currentPaths = data.paths;
-                    displayPathResults(currentPaths);
-                    drawVisualization(); // Add this line to re-render with paths
+                    currentPaths = data.paths || data.data?.paths || [];
+                    displayColoredPathResults(currentPaths);
+                    drawVisualization();
                     
                     if (currentPaths.length > 0) {
                         document.getElementById('simulation-panel').classList.add('active');
@@ -543,28 +706,13 @@
                         showStatus('No paths found', 'info');
                     }
                 } else {
-                    showStatus('Pathfinding failed: ' + data.error, 'error');
+                    showStatus('Pathfinding failed: ' + (data.error || 'Unknown error'), 'error');
                 }
             } catch (error) {
                 showStatus('Network error: ' + error.message, 'error');
             } finally {
                 showLoading(false);
             }
-        }
-
-        function displayPathResults(paths) {
-            const container = document.getElementById('path-results');
-            container.innerHTML = '';
-            
-            paths.forEach((path, index) => {
-                const pathDiv = document.createElement('div');
-                pathDiv.className = 'path-info';
-                pathDiv.innerHTML = `
-                    <strong>Path ${index + 1}:</strong> ${path.length} rooms<br>
-                    <small>${path.join(' → ')}</small>
-                `;
-                container.appendChild(pathDiv);
-            });
         }
 
         async function startSimulation() {
@@ -608,17 +756,19 @@
             ants = [];
             const startRoom = mapData.rooms.find(r => r.is_start);
             
-            if (startRoom && currentPaths.length > 0) {
-                for (let i = 0; i < Math.min(mapData.ant_count, 20); i++) {
+            if (startRoom) {
+                // Initialize all ants with their IDs, starting at the start room
+                for (let i = 0; i < mapData.ant_count; i++) {
+                    const pathIndex = currentPaths.length > 0 ? i % currentPaths.length : 0;
                     ants.push({
                         id: i + 1,
-                        path: currentPaths[i % currentPaths.length],
-                        pathIndex: 0,
+                        pathColor: currentPaths.length > 0 ? PATH_COLORS[pathIndex % PATH_COLORS.length] : COLORS.ant,
+                        currentRoom: startRoom.name,
                         x: startRoom.screenX,
                         y: startRoom.screenY,
                         targetX: startRoom.screenX,
                         targetY: startRoom.screenY,
-                        animationProgress: 0,
+                        animationProgress: 1, // Start with complete animation
                         finished: false
                     });
                 }
@@ -630,7 +780,18 @@
         function pauseSimulation() {
             if (isSimulating) {
                 isPaused = !isPaused;
-                showStatus(isPaused ? 'Simulation paused' : 'Simulation resumed', 'info');
+                if (isPaused) {
+                    // Clear the timer when pausing
+                    if (simulationTimer) {
+                        clearTimeout(simulationTimer);
+                        simulationTimer = null;
+                    }
+                    showStatus('Simulation paused', 'info');
+                } else {
+                    // Resume simulation
+                    showStatus('Simulation resumed', 'info');
+                    updateSimulation();
+                }
             }
         }
 
@@ -640,10 +801,18 @@
             currentTurn = 0;
             simulationData = null;
             ants = [];
+            
+            // Clear the timer
+            if (simulationTimer) {
+                clearTimeout(simulationTimer);
+                simulationTimer = null;
+            }
+            
             currentPaths = [];
             document.getElementById('simulation-panel').classList.remove('active');
             document.getElementById('path-results').innerHTML = '';
             updateSimulationStats();
+            drawVisualization(); // Redraw to remove any effects
         }
 
         function updateSpeed() {
@@ -669,8 +838,21 @@
                 drawVisualization();
             }
             
-            if (isSimulating && !isPaused) {
-                updateSimulation();
+            // Animate ants movement between positions
+            if (isSimulating || ants.length > 0) {
+                ants.forEach(ant => {
+                    if (!ant.finished && ant.animationProgress < 1) {
+                        ant.animationProgress += 0.02 * simulationSpeed;
+                        if (ant.animationProgress >= 1) {
+                            ant.animationProgress = 1;
+                        }
+                        
+                        // Smooth interpolation between current and target position
+                        const t = easeInOut(ant.animationProgress);
+                        ant.x = ant.x + (ant.targetX - ant.x) * t * 0.15;
+                        ant.y = ant.y + (ant.targetY - ant.y) * t * 0.15;
+                    }
+                });
             }
             
             animationId = requestAnimationFrame(animate);
@@ -680,48 +862,56 @@
             if (!simulationData || currentTurn >= simulationData.moves.length) {
                 if (isSimulating) {
                     isSimulating = false;
+                    if (simulationTimer) {
+                        clearTimeout(simulationTimer);
+                        simulationTimer = null;
+                    }
                     showStatus('Simulation completed', 'success');
                 }
                 return;
             }
             
-            // Update ant positions based on simulation data
+            if (isPaused) return;
+            
+            // Get moves for current turn
             const moves = simulationData.moves[currentTurn];
             
-            moves.forEach(([antId, roomName]) => {
-                const ant = ants.find(a => a.id === antId);
-                const room = mapData.rooms.find(r => r.name === roomName);
-                
-                if (ant && room) {
-                    ant.targetX = room.screenX;
-                    ant.targetY = room.screenY;
-                    ant.animationProgress = 0;
+            if (moves && typeof moves === 'object') {
+                // Format: {antId: roomName, antId: roomName}
+                Object.entries(moves).forEach(([antIdStr, roomName]) => {
+                    const antId = parseInt(antIdStr);
+                    const ant = ants.find(a => a.id === antId);
+                    const room = mapData.rooms.find(r => r.name === roomName);
                     
-                    if (room.is_end) {
-                        ant.finished = true;
+                    if (ant && room) {
+                        // Start animation to new position
+                        ant.targetX = room.screenX;
+                        ant.targetY = room.screenY;
+                        ant.animationProgress = 0;
+                        ant.currentRoom = roomName;
+                        
+                        // Check if ant reached the end
+                        if (room.is_end) {
+                            ant.finished = true;
+                        }
                     }
-                }
-            });
+                });
+            }
             
-            // Animate ant movements
-            ants.forEach(ant => {
-                if (ant.animationProgress < 1) {
-                    ant.animationProgress += 0.02 * simulationSpeed;
-                    if (ant.animationProgress >= 1) {
-                        ant.animationProgress = 1;
-                    }
-                    
-                    // Smooth interpolation
-                    const t = easeInOut(ant.animationProgress);
-                    ant.x = ant.x + (ant.targetX - ant.x) * t * 0.1;
-                    ant.y = ant.y + (ant.targetY - ant.y) * t * 0.1;
-                }
-            });
+            // Update stats
+            currentTurn++;
+            updateSimulationStats();
             
-            // Advance to next turn when all animations complete
-            if (ants.every(a => a.animationProgress >= 1 || a.finished)) {
-                currentTurn++;
-                updateSimulationStats();
+            // Schedule next turn with animation time
+            if (isSimulating && currentTurn < simulationData.moves.length) {
+                const delay = Math.max(300, 1500 / simulationSpeed); // Slower for animation
+                simulationTimer = setTimeout(() => {
+                    updateSimulation();
+                }, delay);
+            } else if (currentTurn >= simulationData.moves.length) {
+                // Simulation finished
+                isSimulating = false;
+                showStatus('Simulation completed', 'success');
             }
         }
 
@@ -745,23 +935,30 @@
             ctx.translate(offsetX, offsetY);
             ctx.scale(zoom, zoom);
             
-            // Draw connections
-            ctx.strokeStyle = COLORS.connection;
-            ctx.lineWidth = 2;
-            
+            // Draw connections with path colors
             mapData.connections.forEach(conn => {
                 const roomA = mapData.rooms.find(r => r.name === conn.from);
                 const roomB = mapData.rooms.find(r => r.name === conn.to);
                 
                 if (roomA && roomB) {
-                    // Highlight if both rooms are in current paths
-                    const inPath = currentPaths.some(path => 
-                        path.includes(roomA.name) && path.includes(roomB.name) &&
-                        Math.abs(path.indexOf(roomA.name) - path.indexOf(roomB.name)) === 1
-                    );
+                    // Check if this connection is part of any path
+                    let pathColor = null;
+                    let isInPath = false;
                     
-                    ctx.strokeStyle = inPath ? COLORS.pathConnection : COLORS.connection;
-                    ctx.lineWidth = inPath ? 3 : 2;
+                    for (let pathIndex = 0; pathIndex < currentPaths.length; pathIndex++) {
+                        const path = currentPaths[pathIndex];
+                        const roomAIndex = path.indexOf(roomA.name);
+                        const roomBIndex = path.indexOf(roomB.name);
+                        
+                        if (roomAIndex !== -1 && roomBIndex !== -1 && Math.abs(roomAIndex - roomBIndex) === 1) {
+                            pathColor = PATH_COLORS[pathIndex % PATH_COLORS.length];
+                            isInPath = true;
+                            break;
+                        }
+                    }
+                    
+                    ctx.strokeStyle = isInPath ? pathColor : COLORS.connection;
+                    ctx.lineWidth = isInPath ? 3 : 2;
                     
                     ctx.beginPath();
                     ctx.moveTo(roomA.screenX, roomA.screenY);
@@ -770,9 +967,18 @@
                 }
             });
             
-            // Draw rooms
+            // Draw rooms with path colors
             mapData.rooms.forEach(room => {
-                const inPath = currentPaths.some(path => path.includes(room.name));
+                let roomColor = COLORS.room;
+                
+                // Check if room is in any path and get its color
+                for (let pathIndex = 0; pathIndex < currentPaths.length; pathIndex++) {
+                    const path = currentPaths[pathIndex];
+                    if (path.includes(room.name)) {
+                        roomColor = PATH_COLORS[pathIndex % PATH_COLORS.length];
+                        break;
+                    }
+                }
                 
                 // Room circle
                 ctx.beginPath();
@@ -782,10 +988,8 @@
                     ctx.fillStyle = COLORS.start;
                 } else if (room.is_end) {
                     ctx.fillStyle = COLORS.end;
-                } else if (inPath) {
-                    ctx.fillStyle = COLORS.path;
                 } else {
-                    ctx.fillStyle = COLORS.room;
+                    ctx.fillStyle = roomColor;
                 }
                 
                 ctx.fill();
@@ -800,13 +1004,13 @@
                 ctx.fillText(room.name, room.screenX, room.screenY + 4);
             });
             
-            // Draw ants
+            // Draw ants with their path colors
             if (isSimulating || ants.length > 0) {
                 ants.forEach(ant => {
                     if (!ant.finished) {
                         ctx.beginPath();
                         ctx.arc(ant.x, ant.y, 6, 0, 2 * Math.PI);
-                        ctx.fillStyle = COLORS.ant;
+                        ctx.fillStyle = ant.pathColor || COLORS.ant;
                         ctx.fill();
                         
                         // Ant ID
